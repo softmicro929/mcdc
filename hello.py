@@ -157,20 +157,18 @@ def chooseOne(list, cam):
     return list[0]
 
 
-count_frame, process_every_n_frame = 0, 1
-# get camera device
-#cap = cv2.VideoCapture(0)
 
 video = cv2.VideoCapture(CONFIG.VALID_VIDEO_PATH)
-# Find OpenCV version
-(major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
 
-if int(major_ver)  < 3 :
-    fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-    print ("Frames per second using video.get(cv2.cv.CV_CAP_PROP_FPS): {0}".format(fps))
-else :
-    fps = video.get(cv2.CAP_PROP_FPS)
-    print ("Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}".format(fps))
+# # Find OpenCV version
+# (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
+#
+# if int(major_ver)  < 3 :
+#     fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
+#     print ("Frames per second using video.get(cv2.cv.CV_CAP_PROP_FPS): {0}".format(fps))
+# else :
+#     fps = video.get(cv2.CAP_PROP_FPS)
+#     print ("Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}".format(fps))
 
 birdView.setCameraParams(CONFIG.CAMERA_PARAMETER_PATH)
 #cpy plus at 4.11.19:27
@@ -181,29 +179,42 @@ with open("camera_parameter.json", 'r') as f:
     # print(temp['rule']['namespace'])
 #video.read()
 
+count_frame, process_every_n_frame = 0, 1
+
 pre_x=0
 pre_y=0
 pre_time=0
-_,max_y=birdView.getXY( temp['image_width'], temp['image_height'] )
+_,max_y = birdView.getXY( temp['image_width'], temp['image_height'] )
 pre_v=0
 pre_dis_x=0
 pre_speed_x =0
 
-time_f = open("foo.txt")               # 返回一个文件对象   
-# line = f.readline()               # 调用文件的 readline()方法   
-# while line:   
-#     print line,                   # 后面跟 ',' 将忽略换行符   
-#     #print(line, end = '')　      # 在 Python 3 中使用   
-#     line = f.readline()   
+time_list = []
+
+def getFrameGap(time_gap_times):
+    time_f = open(time_gap_times)
+    while True:
+        line = time_f.readline()
+        if not line:
+            break
+        time_list.append(line)
+    time_f.close()
+    return time_list
+
+#将时间差读进list
+time_list = getFrameGap(CONFIG.FRAME_GAP_TIME_PATH)
+
+
+result_list = []
 
 while(True):
     # get a frame
     ret, img = video.read()
     if img is None and ret is None:
-        print("video.read() fail")
+        print("video.read() fail || video.read() is end!")
         break
 
-    count_frame += 1
+
 
     # show a frame
     # img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
@@ -226,43 +237,31 @@ while(True):
         else:
             x1,y1 = pre_x,pre_y
 
-        time1=float(time_f.readline())
-        #假设 摄像头距离车前的纵向平面是一个固定值k=0.6m
 
-        if(count_frame>1):
-            res_dist= max_y-y1
-            res_v=(pre_y-y1)/(time1-pre_time)
-
-            #写入 json
         #然后计算速度+距离
         #distance_x代表相距前车距离
         distance_x, distance_y = birdView.getXY(temp['image_width'], temp['image_height'])
-
-        speed_x = (distance_x - pre_dis_x) / CONFIG.FRAME_GAP_TIME
-
+        if count_frame > 0:
+            speed_x = (distance_x - pre_dis_x) / list[count_frame]-list[count_frame-1]
+        else:
+            #第一帧的速度默认为10m/s,然后最后输出时再用第二帧的速度去校正它
+            speed_x = 10
         pre_dis_x = distance_x
         pre_speed_x = speed_x
-    
-    
-# 维持python  json
-# test_video_00_pre.json
-#  {
-#  "frame_data": [
-#  {
-#  "vx": -2.3125, //相对速度
-#  "x": 11.0625, //相对位置
-#  "fid": 0 //frame_id, 帧号，输出时帧号从 0 开始顺序依次递增
-#  }, …]
-# }
-        #怎么退出
 
-    time_f.close()
+        # test_video_00_pre.json
+        #  {
+        #  "vx": -2.3125, //相对速度
+        #  "x": 11.0625, //相对位置
+        #  "fid": 0 //frame_id, 帧号，输出时帧号从 0 开始顺序依次递增
+        #  }
+        # }
+        dict = {'vx':speed_x, 'x':distance_x, 'ref_bbox':{"top": only_box[2][1], "right": only_box[2][0]+only_box[2][2], "bot": only_box[2][1]+only_box[2][3], "left": only_box[2][0]}}
 
+        result_list.append(dict)
+        count_frame += 1
 
-
-    # press keyboard 'q' to exit
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+#DO YOUR JSON CONV JOB!!!
 
 #cap.release()
-cv2.destroyAllWindows()
+#cv2.destroyAllWindows()
