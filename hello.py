@@ -125,10 +125,16 @@ def pipeline(img):
         # // 缺点，没有考虑道路方向，也许会变化先这么设定吧.
 def chooseOne(list, cam):
 
+    if list==None:
+        return (0,0,(0,0,0,0) ) #再说
+
     for iterater in list:
         if iterater[0]!="car" && iterater[0]!="truck" && iterater[0]!="bicycle" && iterater[0]!='bus':
             list.remove(iterater)
         elif #剔除自己
+
+    if list==None:
+        return (0,0,(0,0,0,0) ) #再说
 
     width= float(cam['image_width'])
     left = float(cam['image_right'])
@@ -159,22 +165,38 @@ else :
     fps = video.get(cv2.CAP_PROP_FPS)
     print ("Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}".format(fps))
 
+setCameraParams('XXXXXXXXX')
+#cpy plus at 4.11.19:27
+with open("camera_parameter.json", 'r') as f:
+    temp = json.loads(f.read())
+    # print(temp)
+    # print(temp['rule'])
+    # print(temp['rule']['namespace'])
 #video.read()
+
+pre_x=0
+pre_y=0
+pre_time=0
+_,max_y=get( temp['image_width'], temp['image_height'] )
+pre_v=0
+pre_dist=0
+time_f = open("foo.txt")               # 返回一个文件对象   
+# line = f.readline()               # 调用文件的 readline()方法   
+# while line:   
+#     print line,                   # 后面跟 ',' 将忽略换行符   
+#     #print(line, end = '')　      # 在 Python 3 中使用   
+#     line = f.readline()   
+
 while(True):
     # get a frame
     
-    ret, frame = video.read()
+    ret, img = video.read()
+    if !img &&!ret:
+        break
     count_frame += 1
 
-    #cpy plus at 4.11.19:27
-    with open("camera_parameter.json", 'r') as f:
-      temp = json.loads(f.read())
-      # print(temp)
-      # print(temp['rule'])
-      # print(temp['rule']['namespace'])
-
     # show a frame
-    img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
+    # img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
     cv2.imshow("Video", img)
 
     #if running slow on your computer, try process_every_n_frame = 10
@@ -184,10 +206,39 @@ while(True):
         image_, boxes =pipeline(img)
         only_box=chooseOne(boxes, temp)#
         #find target box
+        x1,y1=get( only_box[2][0]+only_box[2][2]/2,only_box[2][1]+only_box[2][3] )
+        time1=float(time_f.readline())
+        #假设 摄像头距离车前的纵向平面是一个固定值k=0.6m
 
-        
+        if(count_frame>1):
+            res_dist= max_y-y1
+            res_v=(pre_y-y1)/(time1-pre_time)*0.6
 
+            #写入 json
+        #然后计算速度+距离
 
+    pre_x=x1
+    pre_y=y1
+    pre_time=time1
+    _,max_y=get( temp['image_width'], temp['image_height'] )
+    pre_v=res_v
+    pre_dist=res_dist
+    
+    
+    
+        # 维持python  json
+# test_video_00_pre.json
+#  {
+#  "frame_data": [
+#  {
+#  "vx": -2.3125, //相对速度
+#  "x": 11.0625, //相对位置
+#  "fid": 0 //frame_id, 帧号，输出时帧号从 0 开始顺序依次递增
+#  }, …]
+# }
+        #怎么退出
+
+time_f.close()
 
 
 
