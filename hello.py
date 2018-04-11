@@ -6,6 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 import cv2
 import darknet as dn
 
+import json
+
 # prepare YOLO
 dn.set_gpu(0)
 net = dn.load_net(str.encode("../cfg/yolov3.cfg"),
@@ -14,6 +16,7 @@ meta = dn.load_meta(str.encode("../cfg/coco.data"))
 
 # box colors
 box_colors = None
+
 
 
 def generate_colors(num_classes):
@@ -112,6 +115,35 @@ def pipeline(img):
     return img_final, result
 
 
+        # 设计算法：得到车的json数组， 找出最可能是前车的框 
+        # // 1、remove json不是车部分 
+        # // 2、除去距离底边最近的车前身 (可以联合相机参数camera_front front越大，剔除的范围越大), 
+        # // 2.5 如果自己的训练的时候，剔除那些被遮挡的车，被遮挡部分大于20% 不需要这个参数了，交并
+        # // 3、读取相机参数， left,right, 找出相机处于图片的位置y_camera    left+right = 车身长度   left和right大概是从车前方看的 从摄像头角度看要反过来
+        # // 4、将那些车按照y距离y_camera的距离d=ABS(（边框左下角y+边框右下角y）/2-y_camera)排序，
+        # // 5、选择d最小的框
+        # // 缺点，没有考虑道路方向，也许会变化先这么设定吧.
+def chooseOne(list, cam):
+
+    for iterater in list:
+        if iterater[0]!="car" && iterater[0]!="truck" && iterater[0]!="bicycle" && iterater[0]!='bus':
+            list.remove(iterater)
+        elif #剔除自己
+
+    width= float(cam['image_width'])
+    left = float(cam['image_right'])
+    right= float(cam['image_left'])
+    y_camera= width*left/(left+right) #rough
+    list = sorted(list, key=lambda x: math.abs( y_camera-(x[2][0]+x[2][2]/2) ) )
+    return list[0]
+
+# example [   (b'bicycle', 0.9941766262054443, (363.4241638183594, 278.7040100097656, 396.94329833984375, 331.8062438964844)), (b'dog', 0.9900424480438232, (221.59780883789062, 380.45477294921875, 186.77037048339844, 312.46099853515625)), (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))]
+
+
+
+
+
+
 count_frame, process_every_n_frame = 0, 1
 # get camera device
 #cap = cv2.VideoCapture(0)
@@ -133,14 +165,34 @@ while(True):
     
     ret, frame = video.read()
     count_frame += 1
-        
+
+    #cpy plus at 4.11.19:27
+    with open("camera_parameter.json", 'r') as f:
+      temp = json.loads(f.read())
+      # print(temp)
+      # print(temp['rule'])
+      # print(temp['rule']['namespace'])
+
     # show a frame
     img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
     cv2.imshow("Video", img)
 
     #if running slow on your computer, try process_every_n_frame = 10
     if count_frame % process_every_n_frame == 0:
-        cv2.imshow("YOLO", pipeline(img))
+        #cv2.imshow("YOLO", pipeline(img))
+        #  res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
+        image_, boxes =pipeline(img)
+        only_box=chooseOne(boxes, temp)#
+        #find target box
+
+        
+
+
+
+
+
+# [(b'bicycle', 0.9941766262054443, (363.4241638183594, 278.7040100097656, 396.94329833984375, 331.8062438964844)), (b'dog', 0.9900424480438232, (221.59780883789062, 380.45477294921875, 186.77037048339844, 312.46099853515625)), (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))]
+# [(b'bicycle', 0.9940141439437866, (363.7655944824219, 279.0475769042969, 396.7613525390625, 330.89581298828125)), (b'dog', 0.9903051257133484, (221.78878784179688, 380.45391845703125, 186.8426055908203, 312.2374267578125)), (b'truck', 0.9090985655784607, (582.0861206054688, 127.82794189453125, 215.32159423828125, 86.12564086914062))]
 
     # press keyboard 'q' to exit
     if cv2.waitKey(1) & 0xFF == ord('q'):
