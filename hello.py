@@ -5,8 +5,9 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import cv2
 import darknet as dn
-
+import bird_view_projection as birdView
 import json
+import CONFIG as CONFIG
 
 # prepare YOLO
 dn.set_gpu(0)
@@ -123,38 +124,44 @@ def pipeline(img):
         # // 4、将那些车按照y距离y_camera的距离d=ABS(（边框左下角y+边框右下角y）/2-y_camera)排序，
         # // 5、选择d最小的框
         # // 缺点，没有考虑道路方向，也许会变化先这么设定吧.
+
+
+# [
+# 	(b'bicycle', 0.9941766262054443,
+# 		(363.4241638183594, 278.7040100097656, 396.94329833984375, 331.8062438964844)),
+# 	(b'dog', 0.9900424480438232,
+# 		(221.59780883789062, 380.45477294921875, 186.77037048339844, 312.46099853515625)),
+# 	(b'truck', 0.9237195253372192,
+# 		(581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))
+# ]
+
 def chooseOne(list, cam):
 
     if list==None:
         return (0,0,(0,0,0,0) ) #再说
 
     for iterater in list:
-        if iterater[0]!="car" && iterater[0]!="truck" && iterater[0]!="bicycle" && iterater[0]!='bus':
+        print(iterater)
+        if iterater[0]!="car" and iterater[0]!="truck" and iterater[0]!="bicycle" and iterater[0]!='bus':
             list.remove(iterater)
-        elif #剔除自己
+
 
     if list==None:
-        return (0,0,(0,0,0,0) ) #再说
+        return None #再说
 
     width= float(cam['image_width'])
     left = float(cam['image_right'])
     right= float(cam['image_left'])
     y_camera= width*left/(left+right) #rough
-    list = sorted(list, key=lambda x: math.abs( y_camera-(x[2][0]+x[2][2]/2) ) )
+    list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
-
-# example [   (b'bicycle', 0.9941766262054443, (363.4241638183594, 278.7040100097656, 396.94329833984375, 331.8062438964844)), (b'dog', 0.9900424480438232, (221.59780883789062, 380.45477294921875, 186.77037048339844, 312.46099853515625)), (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))]
-
-
-
-
 
 
 count_frame, process_every_n_frame = 0, 1
 # get camera device
 #cap = cv2.VideoCapture(0)
 
-video = cv2.VideoCapture('/Users/wangshuainan/Desktop/mcdc_data/valid/valid_video_00.avi')
+video = cv2.VideoCapture(CONFIG.VALID_VIDEO_PATH)
 # Find OpenCV version
 (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
 
@@ -165,7 +172,7 @@ else :
     fps = video.get(cv2.CAP_PROP_FPS)
     print ("Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}".format(fps))
 
-setCameraParams('XXXXXXXXX')
+birdView.setCameraParams(CONFIG.CAMERA_PARAMETER_PATH)
 #cpy plus at 4.11.19:27
 with open("camera_parameter.json", 'r') as f:
     temp = json.loads(f.read())
@@ -177,9 +184,11 @@ with open("camera_parameter.json", 'r') as f:
 pre_x=0
 pre_y=0
 pre_time=0
-_,max_y=get( temp['image_width'], temp['image_height'] )
+_,max_y=birdView.getXY( temp['image_width'], temp['image_height'] )
 pre_v=0
-pre_dist=0
+pre_dis_x=0
+pre_speed_x =0
+
 time_f = open("foo.txt")               # 返回一个文件对象   
 # line = f.readline()               # 调用文件的 readline()方法   
 # while line:   
@@ -189,44 +198,53 @@ time_f = open("foo.txt")               # 返回一个文件对象
 
 while(True):
     # get a frame
-    
     ret, img = video.read()
-    if !img &&!ret:
+    if img is None and ret is None:
+        print("video.read() fail")
         break
+
     count_frame += 1
 
     # show a frame
     # img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
-    cv2.imshow("Video", img)
+    #cv2.imshow("Video", img)
 
     #if running slow on your computer, try process_every_n_frame = 10
     if count_frame % process_every_n_frame == 0:
         #cv2.imshow("YOLO", pipeline(img))
         #  res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
         image_, boxes =pipeline(img)
-        only_box=chooseOne(boxes, temp)#
-        #find target box
-        x1,y1=get( only_box[2][0]+only_box[2][2]/2,only_box[2][1]+only_box[2][3] )
+        only_box=chooseOne(boxes, temp)
+
+        #如果定位框返回空的话，用前面的框
+        if only_box is not None:
+            #find target box
+            #return a tuple : (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))
+            x1, y1 = only_box[2][0]+only_box[2][2]/2, only_box[2][1]+only_box[2][3]
+            pre_x = x1
+            pre_y = y1
+        else:
+            x1,y1 = pre_x,pre_y
+
         time1=float(time_f.readline())
         #假设 摄像头距离车前的纵向平面是一个固定值k=0.6m
 
         if(count_frame>1):
             res_dist= max_y-y1
-            res_v=(pre_y-y1)/(time1-pre_time)*0.6
+            res_v=(pre_y-y1)/(time1-pre_time)
 
             #写入 json
         #然后计算速度+距离
+        #distance_x代表相距前车距离
+        distance_x, distance_y = birdView.getXY(temp['image_width'], temp['image_height'])
 
-    pre_x=x1
-    pre_y=y1
-    pre_time=time1
-    _,max_y=get( temp['image_width'], temp['image_height'] )
-    pre_v=res_v
-    pre_dist=res_dist
+        speed_x = (distance_x - pre_dis_x) / CONFIG.FRAME_GAP_TIME
+
+        pre_dis_x = distance_x
+        pre_speed_x = speed_x
     
     
-    
-        # 维持python  json
+# 维持python  json
 # test_video_00_pre.json
 #  {
 #  "frame_data": [
@@ -238,12 +256,9 @@ while(True):
 # }
         #怎么退出
 
-time_f.close()
+    time_f.close()
 
 
-
-# [(b'bicycle', 0.9941766262054443, (363.4241638183594, 278.7040100097656, 396.94329833984375, 331.8062438964844)), (b'dog', 0.9900424480438232, (221.59780883789062, 380.45477294921875, 186.77037048339844, 312.46099853515625)), (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))]
-# [(b'bicycle', 0.9940141439437866, (363.7655944824219, 279.0475769042969, 396.7613525390625, 330.89581298828125)), (b'dog', 0.9903051257133484, (221.78878784179688, 380.45391845703125, 186.8426055908203, 312.2374267578125)), (b'truck', 0.9090985655784607, (582.0861206054688, 127.82794189453125, 215.32159423828125, 86.12564086914062))]
 
     # press keyboard 'q' to exit
     if cv2.waitKey(1) & 0xFF == ord('q'):
