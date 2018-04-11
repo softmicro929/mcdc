@@ -263,5 +263,13 @@ while(True):
 
 #DO YOUR JSON CONV JOB!!!
 
+final_dict={'frame_data':result_list }
+
+#with open不用考虑关闭流和异常
+with open(CONFIG.WRITE_JSON_PATH,'w') as json_file:
+　　json.dump(final_dict, json_file, ensure_ascii = False)
+
+
+
 #cap.release()
 #cv2.destroyAllWindows()

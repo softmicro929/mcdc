@@ -3,4 +3,4 @@ CAMERA_PARAMETER_PATH = '/Users/wangshuainan/Desktop/mcdc_data/valid/camera_para
 
 FRAME_GAP_TIME_PATH = '/Users/wangshuainan/Desktop/mcdc_data/valid/valid_video_00_time.txt'
 
-
+WRITE_JSON_PATH=''
