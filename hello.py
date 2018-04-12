@@ -291,8 +291,8 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             #  }
             # }
             dict = {'vx': speed_x, 'x': distance_x, "fid": i, 
-                    'ref_bbox': {"top": only_box[2][1], "right": only_box[2][0] + only_box[2][2],
-                                 "bot": only_box[2][1] + only_box[2][3], "left": only_box[2][0]}}
+                    'ref_bbox': {"top": box_y, "right": box_x+box_w,
+                                 "bot": box_y+box_h, "left": box_x}}
 
             result_list.append(dict)
             count_frame += 1
