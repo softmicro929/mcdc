@@ -168,7 +168,7 @@ def getFrameGap(time_gap_times):
     return time_list
 
 
-def handleVideo(video_path,time_txt_name,camera_param_json_name):
+def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param_json_name):
 
     video = cv2.VideoCapture(video_path)
 
@@ -184,7 +184,7 @@ def handleVideo(video_path,time_txt_name,camera_param_json_name):
 
     birdView.setCameraParams(camera_param_json_name)
     # cpy plus at 4.11.19:27
-    with open(CONFIG.CAMERA_PARAMETER_PATH, 'r') as f:
+    with open(camera_param_json_name, 'r') as f:
         temp = json.loads(f.read())
 
     count_frame, process_every_n_frame = 0, 1
@@ -275,13 +275,13 @@ def handleVideo(video_path,time_txt_name,camera_param_json_name):
     # DO YOUR JSON CONV JOB!!!
     final_dict = {'frame_data': result_list}
 
-    # with open不用考虑关闭流和异常
-    with open(CONFIG.WRITE_JSON_PATH, 'w') as json_file:
-        json.dump(final_dict, json_file, ensure_ascii=False)
+    # # with open不用考虑关闭流和异常
+    # with open(output_result_json_path, 'w') as json_file:
+    #     json.dump(final_dict, json_file, ensure_ascii=False)
 
-    # #video_path传入 封装成函数后改成下面的
-    # with open(CONFIG.PARA_JSON_FILEPATH,'wb') as json_file:
-    #     json.dump(final_dict, json_file, ensure_ascii = False)
+    #video_path传入 封装成函数后改成下面的
+    with open(output_result_json_path,'wb') as json_file:
+        json.dump(final_dict, json_file, ensure_ascii = False)
 
     # cap.release()
     # cv2.destroyAllWindows()
