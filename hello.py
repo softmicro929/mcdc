@@ -8,6 +8,7 @@ import cv2
 import darknet as dn
 import bird_view_projection as birdView
 import json
+import CONFIG_SERVER_TEST as CONFIG
 
 # prepare YOLO
 dn.set_gpu(0)
@@ -97,6 +98,13 @@ def array_to_image(arr):
     return im
 
 
+def drawBoxOnImg(img,x,y,w,h,p_x,p_y,num):
+    #img图像，起点坐标，终点坐标（在这里是x+w,y+h,因为w,h分别是人脸的长宽）颜色，线宽）
+    cv2.rectangle(img,(x,y),(x+w,y+h),(127,255,0),2)
+    cv2.circle(img, (p_x,p_y), 2, (255,0,0),-1) 
+    cv2.imwrite('./pic/'+num+'.png',img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
+
+
 def pipeline(img):
     # image data transform
     # img - cv image
@@ -137,7 +145,7 @@ def pipeline(img):
 
 def chooseOne(list, cam):
     if list==None:
-        return (0,0,(0,0,0,0) ) #再说
+        return None #再说
 
     for iterater in list:
         #print(iterater)
@@ -205,10 +213,13 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     car_list = ['/Users/wangshuainan/Desktop/image/1523465188473.jpg',
                 '/Users/wangshuainan/Desktop/image/1523465217730.jpg',
                 '/Users/wangshuainan/Desktop/image/1523465247087.jpg']
-    i = 0
+    i = 8217
+
     while (True):
         if count_frame % 100 == 0:
             print('-----------------------count_frame:',count_frame)
+        if count_frame > 200:
+            break
         # get a frame
         ret, img = video.read()
         # if i < 3:
@@ -244,6 +255,8 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             else:
                 x1, y1 = pre_x, pre_y
 
+            drawBoxOnImg(img,only_box[2][0],only_box[2][1],only_box[2][2],only_box[2][3],x1,y1,i)
+
             # 然后计算速度+距离
             # distance_x代表相距前车距离
             distance_x, distance_y = birdView.getXY(x1, y1)
@@ -263,12 +276,13 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             #  "fid": 0 //frame_id, 帧号，输出时帧号从 0 开始顺序依次递增
             #  }
             # }
-            dict = {'vx': speed_x, 'x': distance_x,
+            dict = {'vx': speed_x, 'x': distance_x, "fid": i, 
                     'ref_bbox': {"top": only_box[2][1], "right": only_box[2][0] + only_box[2][2],
                                  "bot": only_box[2][1] + only_box[2][3], "left": only_box[2][0]}}
 
             result_list.append(dict)
             count_frame += 1
+            i += 1
 
     print('=========pipeline finished,result============>')
     print(result_list)
