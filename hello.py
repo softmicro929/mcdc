@@ -99,7 +99,7 @@ def array_to_image(arr):
 
 
 def drawBoxOnImg(img,x,y,w,h,p_x,p_y,num):
-    ＃img图像，起点坐标，终点坐标（在这里是x+w,y+h,因为w,h分别是人脸的长宽）颜色，线宽）
+    #img图像，起点坐标，终点坐标（在这里是x+w,y+h,因为w,h分别是人脸的长宽）颜色，线宽）
     cv2.rectangle(img,(x,y),(x+w,y+h),(127,255,0),2)
     cv2.circle(img, (p_x,p_y), 2, (255,0,0),-1) 
     cv2.imwrite('./pic/'+num+'.png',img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
