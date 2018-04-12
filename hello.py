@@ -255,7 +255,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             if only_box is not None:
                 # find target box
                 # return a tuple : (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))
-                class_name, class_score, (x, y, w, h) = objection
+                class_name, class_score, (x, y, w, h) = only_box
                 # print(name, score, x, y, w, h)
                 left = int(x - w / 2)
                 right = int(x + w / 2)
