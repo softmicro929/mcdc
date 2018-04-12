@@ -6,4 +6,5 @@ FRAME_GAP_TIME_PATH = '/Users/wangshuainan/Desktop/mcdc_data/valid/valid_video_0
 WRITE_JSON_PATH=''
 
 TEST_VIDEO_PATH='./data/mcdc_data/test'
+
 TEST_DIR= '.../'

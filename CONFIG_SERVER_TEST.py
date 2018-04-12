@@ -1,12 +1,11 @@
 VALID_VIDEO_PATH = '/data/mcdc_data/valid/'
-CAMERA_PARAMETER_PATH = '/Users/wangshuainan/Desktop/mcdc_data/valid/camera_parameter.json'
 
-FRAME_GAP_TIME_PATH = '/Users/wangshuainan/Desktop/mcdc_data/valid/valid_video_00_time.txt'
+CAMERA_PARAMETER_PATH = '/data/mcdc_data/valid/camera_parameter.json'
 
-WRITE_JSON_PATH='/home/m10/workspace/darknet/mcdc/' 
+WRITE_JSON_DIR='/home/m10/workspace/darknet/mcdc/' 
 
-TEST_VIDEO_PATH='/data/mcdc_data/valid'
-#测试数据所在路径
+TEST_VIDEO_DIR='/data/mcdc_data/valid'
+#测试数据所在路径、|||||||||||||||||||||||||||||||||
 
 #要写的json文件的路径
 
