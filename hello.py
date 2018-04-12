@@ -136,7 +136,6 @@ def pipeline(img):
 # ]
 
 def chooseOne(list, cam):
-
     if list==None:
         return (0,0,(0,0,0,0) ) #再说
 
