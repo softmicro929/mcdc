@@ -109,11 +109,12 @@ def pipeline(img):
 
     #print(result)
 
-    toc = time.time()
+    #toc = time.time()
     # print('--------------------one frame: time, result')
     # print(toc - tic, result)
     # print('-------------------------------------------')
-    img_final = draw_boxes(img, result)
+    #img_final = draw_boxes(img, result)
+    img_final = img
     return img_final, result
 
 
