@@ -13,7 +13,7 @@ def list_file(path):
 
     for videoname in video_list:
 
-        time_txt_name = CONFIG.TEST_VIDEO_PATH+videoname[0:-4]+'_time.txt' #时间文件名
+        time_txt_name = CONFIG.TEST_VIDEO_DIR+videoname[0:-4]+'_time.txt' #时间文件名
         json_name     = CONFIG.WRITE_JSON_DIR+videoname[0:-4]+'_pre.json'
         video_path    = CONFIG.TEST_VIDEO_DIR+videoname
         handleVideo(video_path,time_txt_name,json_name, CAMERA_PARAMETER_PATH)
