@@ -7,7 +7,6 @@ import cv2
 import darknet as dn
 import bird_view_projection as birdView
 import json
-import CONFIG as CONFIG
 
 # prepare YOLO
 dn.set_gpu(0)
