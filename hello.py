@@ -142,7 +142,7 @@ def chooseOne(list, cam):
 
     for iterater in list:
         print(iterater)
-        if iterater[0]!="car" and iterater[0]!="truck" and iterater[0]!="bicycle" and iterater[0]!='bus':
+        if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bicycle' and iterater[0]!='bus':
             list.remove(iterater)
 
 
@@ -272,6 +272,16 @@ while(True):
 
 print(result_list)
 #DO YOUR JSON CONV JOB!!!
+
+final_dict={'frame_data':result_list }
+
+#with open不用考虑关闭流和异常
+with open(CONFIG.WRITE_JSON_PATH,'w') as json_file: 
+    json.dump(final_dict, json_file, ensure_ascii = False)
+
+#video_path传入 封装成函数后改成下面的
+with open(PARA_JSON_FILEPATH,'wb') as json_file: 
+    json.dump(final_dict, json_file, ensure_ascii = False)
 
 #cap.release()
 #cv2.destroyAllWindows()
