@@ -3,6 +3,7 @@ import os
 import sys
 import os.path
 import CONFIG_SERVER_TEST as CONFIG
+import hello as h
 def list_file(path):
     count = 0
     video_list=[]
@@ -16,7 +17,7 @@ def list_file(path):
         time_txt_name = CONFIG.TEST_VIDEO_DIR+videoname[0:-4]+'_time.txt' #时间文件名
         json_name     = CONFIG.WRITE_JSON_DIR+videoname[0:-4]+'_pre.json'
         video_path    = CONFIG.TEST_VIDEO_DIR+videoname
-        handleVideo(video_path,time_txt_name,json_name, CAMERA_PARAMETER_PATH)
+        h.handleVideo(video_path,time_txt_name,json_name, CAMERA_PARAMETER_PATH)
         #写json由python完成
 
 # 工程项目文件全部统一放在 ~/MCDC_队伍名/ 中，并写好 run.sh 一键运行
