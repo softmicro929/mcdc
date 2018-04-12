@@ -203,6 +203,11 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     pre_y = 960
     pre_dis_x = 0
 
+    pre_box_x = 0
+    pre_box_y = 0
+    pre_box_w = 0
+    pre_box_h = 0
+
     # 将时间差读进list
     time_list = getFrameGap(time_txt_name)
 
@@ -251,12 +256,20 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
                 # find target box
                 # return a tuple : (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))
                 x1, y1 = only_box[2][0] + only_box[2][2] / 2, only_box[2][1] + only_box[2][3]
-                pre_x = x1
-                pre_y = y1
+
+                box_x = only_box[2][0]
+                box_y = only_box[2][1]
+                box_w = only_box[2][2]
+                box_h = only_box[2][3]
+
+                pre_x, pre_y = x1, y1
+                pre_box_x, pre_box_y, pre_box_w, pre_box_h = box_x, box_y, box_w, box_h
+             
             else:
                 x1, y1 = pre_x, pre_y
+                box_x, box_y, box_w, box_h = pre_box_x, pre_box_y, pre_box_w, pre_box_h
 
-            drawBoxOnImg(img,only_box[2][0],only_box[2][1],only_box[2][2],only_box[2][3],x1,y1,i)
+            drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, i)
 
             # 然后计算速度+距离
             # distance_x代表相距前车距离
