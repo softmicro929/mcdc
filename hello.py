@@ -67,7 +67,7 @@ def draw_boxes(img, result):
         left = max(0, np.floor(left + 0.5).astype('int32'))
         bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
         right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
-        print(label, (left, top), (right, bottom))
+        #print(label, (left, top), (right, bottom))
 
         if top - label_size[1] >= 0:
             text_origin = np.array([left, top - label_size[1]])
@@ -140,7 +140,7 @@ def chooseOne(list, cam):
         return (0,0,(0,0,0,0) ) #再说
 
     for iterater in list:
-        print(iterater)
+        #print(iterater)
         if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bicycle' and iterater[0]!='bus':
             list.remove(iterater)
 
@@ -207,6 +207,8 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
                 '/Users/wangshuainan/Desktop/image/1523465247087.jpg']
     i = 0
     while (True):
+        if count_frame % 100 == 0:
+            print('-----------------------count_frame:',count_frame)
         # get a frame
         ret, img = video.read()
         # if i < 3:
@@ -217,7 +219,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
         # if img is None:
         #     print("video.read() fail || video.read() is end!")
         #     break
-        if img is None and ret is None:
+        if img is None or ret is None:
             print("video.read() fail || video.read() is end!")
             break
 
