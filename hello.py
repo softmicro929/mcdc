@@ -145,7 +145,7 @@ def pipeline(img):
 # ]
 
 def chooseOne(list, cam):
-    if list==None:
+    if list is None:
         return None #再说
 
     for iterater in list:
@@ -154,7 +154,7 @@ def chooseOne(list, cam):
             list.remove(iterater)
 
 
-    if list==None:
+    if list is None:
         return None #再说
 
     width= float(cam['image_width'])
