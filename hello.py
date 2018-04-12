@@ -222,9 +222,9 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     i = 8217
 
     while (True):
-        if count_frame % 100 == 0:
+        if count_frame % 10 == 0:
             print('-----------------------count_frame:',count_frame)
-        if count_frame > 200:
+        if count_frame > 100:
             break
         # get a frame
         ret, img = video.read()
@@ -310,7 +310,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     #     json.dump(final_dict, json_file, ensure_ascii=False)
 
     #video_path传入 封装成函数后改成下面的
-    with open(output_result_json_path,'wb') as json_file:
+    with open(output_result_json_path,'w') as json_file:
         json.dump(final_dict, json_file, ensure_ascii = False)
 
     # cap.release()
