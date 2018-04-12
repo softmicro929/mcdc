@@ -175,6 +175,13 @@ def array_to_image(arr):
     im = IMAGE(w, h, c, data)
     return im
 
+def drawBoxOnImg(img,x,y,w,h,num):
+    #img图像，起点坐标，终点坐标（在这里是x+w,y+h,因为w,h分别是人脸的长宽）颜色，线宽）
+    cv2.rectangle(img,(int(x),int(y)),(int(x+w),int(y+h)),(127,255,0),2)
+    # cv2.circle(img, (int(p_x),int(p_y)), 2, (255,0,0),-1) 
+    img_path = '../pic/'+str(num)+'.png'
+    cv2.imwrite(img_path,img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
+
 if __name__ == "__main__":
     #net = load_net("cfg/densenet201.cfg", "/home/pjreddie/trained/densenet201.weights", 0)
     #im = load_image("data/wolf.jpg", 0, 0)
@@ -191,6 +198,7 @@ if __name__ == "__main__":
     rgbgr_image(im)
     r1 = detect1(net,meta,im)
     print (r1)
+
 
     #[(b'bicycle', 0.9941766262054443, (363.4241638183594, 278.70404052734375, 396.94329833984375, 331.8062744140625)), (b'dog', 0.9900424480438232, (221.59780883789062, 380.45477294921875, 186.77037048339844, 312.46099853515625)), (b'truck', 0.9237195253372192, (581.048583984375, 128.27194213867188, 215.67906188964844, 85.07489776611328))]
     

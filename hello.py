@@ -100,9 +100,9 @@ def array_to_image(arr):
 
 def drawBoxOnImg(img,x,y,w,h,p_x,p_y,num):
     #img图像，起点坐标，终点坐标（在这里是x+w,y+h,因为w,h分别是人脸的长宽）颜色，线宽）
-    cv2.rectangle(img,(int(x),int(y)),(int(x+w),int(y+h)),(127,255,0),2)
-    cv2.circle(img, (int(p_x),int(p_y)), 2, (255,0,0),-1) 
-    img_path = './pic/'+str(num)+'.png'
+    cv2.rectangle(img,(int(x),int(y)),(int(x+w),int(y+h)),(127,255,0),5)
+    cv2.circle(img, (int(p_x),int(p_y)), 5, (255,0,0),-1) 
+    img_path = '../pic/'+str(num)+'.png'
     cv2.imwrite(img_path,img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
 
 
@@ -122,8 +122,8 @@ def pipeline(img):
     # print('--------------------one frame: time, result')
     # print(toc - tic, result)
     # print('-------------------------------------------')
-    #img_final = draw_boxes(img, result)
-    img_final = img
+    img_final = draw_boxes(img, result)
+    #img_final = img
     return img_final, result
 
 
@@ -224,7 +224,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     while (True):
         if count_frame % 10 == 0:
             print('-----------------------count_frame:',count_frame)
-        if count_frame > 100:
+        if count_frame > 30:
             break
         # get a frame
         ret, img = video.read()
@@ -255,12 +255,19 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             if only_box is not None:
                 # find target box
                 # return a tuple : (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))
-                x1, y1 = only_box[2][0] + only_box[2][2] / 2, only_box[2][1] + only_box[2][3]
+                class_name, class_score, (x, y, w, h) = objection
+                # print(name, score, x, y, w, h)
+                left = int(x - w / 2)
+                right = int(x + w / 2)
+                top = int(y - h / 2)
+                bottom = int(y + h / 2)
 
-                box_x = only_box[2][0]
-                box_y = only_box[2][1]
-                box_w = only_box[2][2]
-                box_h = only_box[2][3]
+                x1, y1 = x, y + int(h/2)
+
+                box_x = int(x - w / 2)
+                box_y = int(y - h / 2)
+                box_w = w
+                box_h = h
 
                 pre_x, pre_y = x1, y1
                 pre_box_x, pre_box_y, pre_box_w, pre_box_h = box_x, box_y, box_w, box_h
@@ -315,3 +322,43 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
 
     # cap.release()
     # cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    
+    lenna_img = cv2.imread("../data/8217.png")
+    img,_ = pipeline(lenna_img)
+    cv2.imwrite('../pic/1.jpg',img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
+    cv2.imshow("YOLO", img)
+    image_, boxes = pipeline(img)
+
+    with open('/Users/wangshuainan/Desktop/mcdc_data/valid/camera_parameter.json', 'r') as f:
+        temp = json.loads(f.read())
+
+    only_box = chooseOne(boxes, temp)
+    class_name, class_score, (x, y, w, h) = only_box
+    # print(name, score, x, y, w, h)
+    left = int(x - w / 2)
+    right = int(x + w / 2)
+    top = int(y - h / 2)
+    bottom = int(y + h / 2)
+
+    x1, y1 = x, y + int(h/2)
+
+    box_x = int(x - w / 2)
+    box_y = int(y - h / 2)
+    box_w = w
+    box_h = h
+
+    drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, 5)
+
+    # lenna_img = cv2.imread("../data/8218.png")
+    # img,_ = pipeline(lenna_img)
+    # cv2.imwrite('../pic/2.jpg',img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
+    # cv2.imshow("YOLO", img)
+
+    # lenna_img = cv2.imread("../data/8219.png")
+    # img,_ = pipeline(lenna_img)
+    # cv2.imwrite('../pic/3.jpg',img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
+    # cv2.imshow("YOLO", img)
+    # cv2.waitKey(1)
+
