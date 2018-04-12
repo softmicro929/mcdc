@@ -4,6 +4,8 @@ import cv2
 import json
 import numpy as np
 
+cam_param = None
+json_param = ''
 
 def read_cam_param(json_param):
     K = np.array(cam_param["camera_matrix"]).reshape((3, 3))
@@ -47,15 +49,18 @@ def bird_view_proj(u, v, K, dist_coeff, R, T):
 
     return bv_x, bv_y
 
-cam_param = None
 
-def setCameraParams(json_param):
+def setCameraParams(json_param_path):
+    global json_param
+    json_param = json_param_path
     with open(json_param) as f:
         cam_param = json.load(f)
 
     return cam_param
 
 def getXY(u,v):
+    global cam_param
+    global json_param
     if cam_param is None:
         cam_param = setCameraParams(json_param)
 
@@ -71,14 +76,17 @@ def getXY(u,v):
     
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description='Bird-view projection.')
-    parser.add_argument('-c', '--cam_calib', required=True,
-                        help='calibrated camera parameter file path')
-    args = parser.parse_args()
+    # import argparse
+    # parser = argparse.ArgumentParser(description='Bird-view projection.')
+    # parser.add_argument('-c', '--cam_calib', required=True,
+    #                     help='calibrated camera parameter file path')
+    # args = parser.parse_args()
 
     # read camera parameters
-    with open(args.cam_calib) as f:
+    # with open(args.cam_calib) as f:
+    #     cam_param = json.load(f)
+    json_path = '/Users/wangshuainan/Desktop/mcdc_data/valid/camera_parameter.json'
+    with open(json_path) as f:
         cam_param = json.load(f)
 
     K, dist_coeff, R, T = read_cam_param(cam_param)
@@ -90,4 +98,4 @@ if __name__ == "__main__":
     # project to bird-view
     x, y = bird_view_proj(u, v, K, dist_coeff, R, T)
 
-    print x, y
+    print (x, y)

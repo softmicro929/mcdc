@@ -41,7 +41,7 @@ def draw_boxes(img, result):
 
     image = Image.fromarray(img)
 
-    font = ImageFont.truetype(font='font/FiraMono-Medium.otf', size=20)
+    font = ImageFont.truetype(font='../font/FiraMono-Medium.otf', size=20)
     thickness = (image.size[0] + image.size[1]) // 300
 
     num_classes = len(result)
@@ -150,8 +150,8 @@ def chooseOne(list, cam):
         return None #再说
 
     width= float(cam['image_width'])
-    left = float(cam['image_right'])
-    right= float(cam['image_left'])
+    left = float(cam['cam_to_right'])
+    right= float(cam['cam_to_left'])
     y_camera= width*left/(left+right) #rough
     list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
@@ -172,7 +172,7 @@ video = cv2.VideoCapture(CONFIG.VALID_VIDEO_PATH)
 
 birdView.setCameraParams(CONFIG.CAMERA_PARAMETER_PATH)
 #cpy plus at 4.11.19:27
-with open("camera_parameter.json", 'r') as f:
+with open(CONFIG.CAMERA_PARAMETER_PATH, 'r') as f:
     temp = json.loads(f.read())
     # print(temp)
     # print(temp['rule'])
@@ -184,17 +184,17 @@ count_frame, process_every_n_frame = 0, 1
 pre_x=0
 pre_y=0
 pre_time=0
-_,max_y = birdView.getXY( temp['image_width'], temp['image_height'] )
+#_,max_y = birdView.getXY( temp['image_width'], temp['image_height'] )
 pre_v=0
 pre_dis_x=0
-pre_speed_x =0
+pre_speed_x =0.00
 
 time_list = []
 
 def getFrameGap(time_gap_times):
     time_f = open(time_gap_times)
     while True:
-        line = time_f.readline()
+        line = time_f.readline().strip('\n')
         if not line:
             break
         time_list.append(line)
@@ -204,17 +204,26 @@ def getFrameGap(time_gap_times):
 #将时间差读进list
 time_list = getFrameGap(CONFIG.FRAME_GAP_TIME_PATH)
 
+print(time_list)
 
 result_list = []
 
+car_list = ['/Users/wangshuainan/Desktop/image/1523465188473.jpg','/Users/wangshuainan/Desktop/image/1523465217730.jpg','/Users/wangshuainan/Desktop/image/1523465247087.jpg']
+i = 0
 while(True):
     # get a frame
-    ret, img = video.read()
-    if img is None and ret is None:
+    #ret, img = video.read()
+    if i < 3:
+        img = cv2.imread(car_list[i])
+        i += 1
+    else:
+        break
+    if img is None:
         print("video.read() fail || video.read() is end!")
         break
-
-
+    # if img is None and ret is None:
+    #     print("video.read() fail || video.read() is end!")
+    #     break
 
     # show a frame
     # img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
@@ -240,9 +249,9 @@ while(True):
 
         #然后计算速度+距离
         #distance_x代表相距前车距离
-        distance_x, distance_y = birdView.getXY(temp['image_width'], temp['image_height'])
+        distance_x, distance_y = birdView.getXY(x1, y1)
         if count_frame > 0:
-            speed_x = (distance_x - pre_dis_x) / list[count_frame]-list[count_frame-1]
+            speed_x = (distance_x - pre_dis_x) / float(float(time_list[count_frame]) - float(time_list[count_frame-1]))
         else:
             #第一帧的速度默认为10m/s,然后最后输出时再用第二帧的速度去校正它
             speed_x = 10
@@ -261,6 +270,7 @@ while(True):
         result_list.append(dict)
         count_frame += 1
 
+print(result_list)
 #DO YOUR JSON CONV JOB!!!
 
 #cap.release()
