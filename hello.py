@@ -110,9 +110,9 @@ def pipeline(img):
     #print(result)
 
     toc = time.time()
-    print('--------------------one frame: time, result')
-    print(toc - tic, result)
-    print('-------------------------------------------')
+    # print('--------------------one frame: time, result')
+    # print(toc - tic, result)
+    # print('-------------------------------------------')
     img_final = draw_boxes(img, result)
     return img_final, result
 
