@@ -164,6 +164,50 @@ def chooseOne(list, cam):
     list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
 
+def chooseOnImprove(list, cam):
+    if list is None:
+        return None #再说
+
+    width= float(cam['image_width'])
+    height= float(cam['image_height'])
+    left = float(cam['cam_to_right'])
+    right= float(cam['cam_to_left'])
+    x_car_mid= (width*left/(left+right)+width/2)/2 # 加上中点平滑处理一下 有待改进
+
+    for iterater in list:
+        #print(iterater)
+        # 中心点，宽度，高度 
+        p0=iterater[2][0]
+        p1=iterater[2][1]
+        w=iterater[2][2]
+        h=iterater[2][3]
+        if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
+            list.remove(iterater)
+        elif h/w>1.4 : 
+            list.remove(iterater)
+        elif abs(x_car_mid-p0)>width/5:
+            list.remove(iterater)
+        elif p1+h/2>height*0.93
+            list.remove(iterater)
+            # 和车中点距离过于远：
+
+    if list is None:
+        return None #再说
+
+    #y越大越可能是前车
+    list = sorted(list, key=lambda x: -x[2][1] )
+    return list[0]  
+
+    if list==None:
+        return None #再说
+
+    width= float(cam['image_width'])
+    left = float(cam['cam_to_right'])
+    right= float(cam['cam_to_left'])
+    y_camera= width*left/(left+right) #rough
+    list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
+    return list[0]
+    
 
 def getFrameGap(time_gap_times):
     time_list = []
