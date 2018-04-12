@@ -154,7 +154,7 @@ def chooseOne(list, cam):
             list.remove(iterater)
 
 
-    if list is None:
+    if len(list) == 0:
         return None #再说
 
     width= float(cam['image_width'])
