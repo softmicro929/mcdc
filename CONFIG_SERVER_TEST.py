@@ -5,7 +5,7 @@ CAMERA_PARAMETER_PATH = '/data/mcdc_data/valid/camera_parameter.json'
 
 WRITE_JSON_DIR='/home/m10/workspace/darknet/mcdc/' 
 
-TEST_VIDEO_DIR='/data/mcdc_data/valid'
+TEST_VIDEO_DIR='/data/mcdc_data/valid/'
 #测试数据所在路径、|||||||||||||||||||||||||||||||||
 
 #要写的json文件的路径
