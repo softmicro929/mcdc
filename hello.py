@@ -219,7 +219,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     while (True):
         if count_frame % 100 == 0:
             print('-----------------------count_frame:',count_frame)
-        if(count_frame > 200)
+        if count_frame > 200:
             break
         # get a frame
         ret, img = video.read()
