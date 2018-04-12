@@ -110,22 +110,21 @@ def pipeline(img):
     #print(result)
 
     toc = time.time()
+    print('--------------------one frame: time, result')
     print(toc - tic, result)
-
+    print('-------------------------------------------')
     img_final = draw_boxes(img, result)
     return img_final, result
 
 
-        # 设计算法：得到车的json数组， 找出最可能是前车的框 
-        # // 1、remove json不是车部分 
-        # // 2、除去距离底边最近的车前身 (可以联合相机参数camera_front front越大，剔除的范围越大), 
-        # // 2.5 如果自己的训练的时候，剔除那些被遮挡的车，被遮挡部分大于20% 不需要这个参数了，交并
-        # // 3、读取相机参数， left,right, 找出相机处于图片的位置y_camera    left+right = 车身长度   left和right大概是从车前方看的 从摄像头角度看要反过来
-        # // 4、将那些车按照y距离y_camera的距离d=ABS(（边框左下角y+边框右下角y）/2-y_camera)排序，
-        # // 5、选择d最小的框
-        # // 缺点，没有考虑道路方向，也许会变化先这么设定吧.
-
-
+# 设计算法：得到车的json数组， 找出最可能是前车的框
+# // 1、remove json不是车部分
+# // 2、除去距离底边最近的车前身 (可以联合相机参数camera_front front越大，剔除的范围越大),
+# // 2.5 如果自己的训练的时候，剔除那些被遮挡的车，被遮挡部分大于20% 不需要这个参数了，交并
+# // 3、读取相机参数， left,right, 找出相机处于图片的位置y_camera    left+right = 车身长度   left和right大概是从车前方看的 从摄像头角度看要反过来
+# // 4、将那些车按照y距离y_camera的距离d=ABS(（边框左下角y+边框右下角y）/2-y_camera)排序，
+# // 5、选择d最小的框
+# // 缺点，没有考虑道路方向，也许会变化先这么设定吧.
 # [
 # 	(b'bicycle', 0.9941766262054443,
 # 		(363.4241638183594, 278.7040100097656, 396.94329833984375, 331.8062438964844)),
@@ -157,41 +156,8 @@ def chooseOne(list, cam):
     return list[0]
 
 
-
-video = cv2.VideoCapture(CONFIG.VALID_VIDEO_PATH)
-
-# # Find OpenCV version
-# (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
-#
-# if int(major_ver)  < 3 :
-#     fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
-#     print ("Frames per second using video.get(cv2.cv.CV_CAP_PROP_FPS): {0}".format(fps))
-# else :
-#     fps = video.get(cv2.CAP_PROP_FPS)
-#     print ("Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}".format(fps))
-
-birdView.setCameraParams(CONFIG.CAMERA_PARAMETER_PATH)
-#cpy plus at 4.11.19:27
-with open(CONFIG.CAMERA_PARAMETER_PATH, 'r') as f:
-    temp = json.loads(f.read())
-    # print(temp)
-    # print(temp['rule'])
-    # print(temp['rule']['namespace'])
-#video.read()
-
-count_frame, process_every_n_frame = 0, 1
-
-pre_x=0
-pre_y=0
-pre_time=0
-#_,max_y = birdView.getXY( temp['image_width'], temp['image_height'] )
-pre_v=0
-pre_dis_x=0
-pre_speed_x =0.00
-
-time_list = []
-
 def getFrameGap(time_gap_times):
+    time_list = []
     time_f = open(time_gap_times)
     while True:
         line = time_f.readline().strip('\n')
@@ -201,87 +167,121 @@ def getFrameGap(time_gap_times):
     time_f.close()
     return time_list
 
-#将时间差读进list
-time_list = getFrameGap(CONFIG.FRAME_GAP_TIME_PATH)
 
-print(time_list)
+def handleVideo(video_path,time_txt_name,camera_param_json_name):
 
-result_list = []
+    video = cv2.VideoCapture(video_path)
 
-car_list = ['/Users/wangshuainan/Desktop/image/1523465188473.jpg','/Users/wangshuainan/Desktop/image/1523465217730.jpg','/Users/wangshuainan/Desktop/image/1523465247087.jpg']
-i = 0
-while(True):
-    # get a frame
-    #ret, img = video.read()
-    if i < 3:
-        img = cv2.imread(car_list[i])
-        i += 1
-    else:
-        break
-    if img is None:
-        print("video.read() fail || video.read() is end!")
-        break
-    # if img is None and ret is None:
-    #     print("video.read() fail || video.read() is end!")
-    #     break
+    # # Find OpenCV version
+    # (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
+    #
+    # if int(major_ver)  < 3 :
+    #     fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
+    #     print ("Frames per second using video.get(cv2.cv.CV_CAP_PROP_FPS): {0}".format(fps))
+    # else :
+    #     fps = video.get(cv2.CAP_PROP_FPS)
+    #     print ("Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}".format(fps))
 
-    # show a frame
-    # img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
-    #cv2.imshow("Video", img)
+    birdView.setCameraParams(camera_param_json_name)
+    # cpy plus at 4.11.19:27
+    with open(CONFIG.CAMERA_PARAMETER_PATH, 'r') as f:
+        temp = json.loads(f.read())
 
-    #if running slow on your computer, try process_every_n_frame = 10
-    if count_frame % process_every_n_frame == 0:
-        #cv2.imshow("YOLO", pipeline(img))
-        #  res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
-        image_, boxes =pipeline(img)
-        only_box=chooseOne(boxes, temp)
+    count_frame, process_every_n_frame = 0, 1
 
-        #如果定位框返回空的话，用前面的框
-        if only_box is not None:
-            #find target box
-            #return a tuple : (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))
-            x1, y1 = only_box[2][0]+only_box[2][2]/2, only_box[2][1]+only_box[2][3]
-            pre_x = x1
-            pre_y = y1
-        else:
-            x1,y1 = pre_x,pre_y
+    #"前一帧在图像中选取的点"，用来避免当前帧没有框出车
+    pre_x = 960
+    pre_y = 960
+    pre_dis_x = 0
 
+    # 将时间差读进list
+    time_list = getFrameGap(time_txt_name)
 
-        #然后计算速度+距离
-        #distance_x代表相距前车距离
-        distance_x, distance_y = birdView.getXY(x1, y1)
-        if count_frame > 0:
-            speed_x = (distance_x - pre_dis_x) / float(float(time_list[count_frame]) - float(time_list[count_frame-1]))
-        else:
-            #第一帧的速度默认为10m/s,然后最后输出时再用第二帧的速度去校正它
-            speed_x = 10
-        pre_dis_x = distance_x
-        pre_speed_x = speed_x
+    #print(time_list)
+    print('------------read time_txt finished, lines:', len(time_list))
 
-        # test_video_00_pre.json
-        #  {
-        #  "vx": -2.3125, //相对速度
-        #  "x": 11.0625, //相对位置
-        #  "fid": 0 //frame_id, 帧号，输出时帧号从 0 开始顺序依次递增
-        #  }
-        # }
-        dict = {'vx':speed_x, 'x':distance_x, 'ref_bbox':{"top": only_box[2][1], "right": only_box[2][0]+only_box[2][2], "bot": only_box[2][1]+only_box[2][3], "left": only_box[2][0]}}
+    result_list = []
 
-        result_list.append(dict)
-        count_frame += 1
+    car_list = ['/Users/wangshuainan/Desktop/image/1523465188473.jpg',
+                '/Users/wangshuainan/Desktop/image/1523465217730.jpg',
+                '/Users/wangshuainan/Desktop/image/1523465247087.jpg']
+    i = 0
+    while (True):
+        # get a frame
+        ret, img = video.read()
+        # if i < 3:
+        #     img = cv2.imread(car_list[i])
+        #     i += 1
+        # else:
+        #     break
+        # if img is None:
+        #     print("video.read() fail || video.read() is end!")
+        #     break
+        if img is None and ret is None:
+            print("video.read() fail || video.read() is end!")
+            break
 
-print(result_list)
-#DO YOUR JSON CONV JOB!!!
+        # show a frame
+        # img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
+        # cv2.imshow("Video", img)
 
-final_dict={'frame_data':result_list }
+        # if running slow on your computer, try process_every_n_frame = 10
+        if count_frame % process_every_n_frame == 0:
+            # cv2.imshow("YOLO", pipeline(img))
+            #  res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
+            image_, boxes = pipeline(img)
+            only_box = chooseOne(boxes, temp)
 
-#with open不用考虑关闭流和异常
-with open(CONFIG.WRITE_JSON_PATH,'w') as json_file: 
-    json.dump(final_dict, json_file, ensure_ascii = False)
+            # 如果定位框返回空的话，用前面的框
+            if only_box is not None:
+                # find target box
+                # return a tuple : (b'truck', 0.9237195253372192, (581.048583984375, 128.2719268798828, 215.67906188964844, 85.07489776611328))
+                x1, y1 = only_box[2][0] + only_box[2][2] / 2, only_box[2][1] + only_box[2][3]
+                pre_x = x1
+                pre_y = y1
+            else:
+                x1, y1 = pre_x, pre_y
 
-#video_path传入 封装成函数后改成下面的
-with open(PARA_JSON_FILEPATH,'wb') as json_file: 
-    json.dump(final_dict, json_file, ensure_ascii = False)
+            # 然后计算速度+距离
+            # distance_x代表相距前车距离
+            distance_x, distance_y = birdView.getXY(x1, y1)
+            if count_frame > 0:
+                speed_x = (distance_x - pre_dis_x) / float(
+                    float(time_list[count_frame]) - float(time_list[count_frame - 1]))
+            else:
+                # 第一帧的速度默认为10m/s,然后最后输出时再用第二帧的速度去校正它
+                speed_x = 10
+            pre_dis_x = distance_x
+            pre_speed_x = speed_x
 
-#cap.release()
-#cv2.destroyAllWindows()
+            # test_video_00_pre.json
+            #  {
+            #  "vx": -2.3125, //相对速度
+            #  "x": 11.0625, //相对位置
+            #  "fid": 0 //frame_id, 帧号，输出时帧号从 0 开始顺序依次递增
+            #  }
+            # }
+            dict = {'vx': speed_x, 'x': distance_x,
+                    'ref_bbox': {"top": only_box[2][1], "right": only_box[2][0] + only_box[2][2],
+                                 "bot": only_box[2][1] + only_box[2][3], "left": only_box[2][0]}}
+
+            result_list.append(dict)
+            count_frame += 1
+
+    print('=========pipeline finished,result============>')
+    print(result_list)
+    print('=============================================>')
+
+    # DO YOUR JSON CONV JOB!!!
+    final_dict = {'frame_data': result_list}
+
+    # with open不用考虑关闭流和异常
+    with open(CONFIG.WRITE_JSON_PATH, 'w') as json_file:
+        json.dump(final_dict, json_file, ensure_ascii=False)
+
+    # #video_path传入 封装成函数后改成下面的
+    # with open(CONFIG.PARA_JSON_FILEPATH,'wb') as json_file:
+    #     json.dump(final_dict, json_file, ensure_ascii = False)
+
+    # cap.release()
+    # cv2.destroyAllWindows()
