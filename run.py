@@ -27,4 +27,4 @@ def list_file(path):
 
 
 if __name__=="__main__":
-    list_file(CONFIG.TEST_VIDEO_PATH)
+    list_file(CONFIG.TEST_VIDEO_DIR)
