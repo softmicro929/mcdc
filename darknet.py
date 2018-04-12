@@ -1,3 +1,4 @@
+# -*- encoding:utf-8 -*-
 from ctypes import *
 import math
 import random

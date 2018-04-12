@@ -1,3 +1,4 @@
+# -*- encoding:utf-8 -*-
 VALID_VIDEO_PATH = '/data/mcdc_data/valid/'
 CAMERA_PARAMETER_PATH = '/Users/wangshuainan/Desktop/mcdc_data/valid/camera_parameter.json'
 
