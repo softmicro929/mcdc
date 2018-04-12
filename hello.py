@@ -150,7 +150,7 @@ def chooseOne(list, cam):
 
     for iterater in list:
         #print(iterater)
-        if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bicycle' and iterater[0]!='bus':
+        if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
             list.remove(iterater)
 
 
