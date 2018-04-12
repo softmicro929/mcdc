@@ -41,7 +41,7 @@ def draw_boxes(img, result):
 
     image = Image.fromarray(img)
 
-    font = ImageFont.truetype(font=str.encode('../font/FiraMono-Medium.otf'), size=20)
+    font = ImageFont.truetype(str.encode('../font/FiraMono-Medium.otf'), 20)
     thickness = (image.size[0] + image.size[1]) // 300
 
     num_classes = len(result)
