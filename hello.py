@@ -164,6 +164,7 @@ def chooseOne(list, cam):
     list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
 
+
 def chooseOnImprove(list, cam):
     if list is None:
         return None #再说
@@ -183,11 +184,11 @@ def chooseOnImprove(list, cam):
         h=iterater[2][3]
         if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
             list.remove(iterater)
-        elif h/w>1.4 : 
+        elif h/w>1.2 : 
             list.remove(iterater)
-        elif abs(x_car_mid-p0)>width/5:
+        elif abs(x_car_mid-p0)>width/6:
             list.remove(iterater)
-        elif p1+h/2>height*0.93:
+        elif p1+h>height*0.96
             list.remove(iterater)
             # 和车中点距离过于远：
 
@@ -196,16 +197,6 @@ def chooseOnImprove(list, cam):
 
     #y越大越可能是前车
     list = sorted(list, key=lambda x: -x[2][1] )
-    return list[0]  
-
-    if list==None:
-        return None #再说
-
-    width= float(cam['image_width'])
-    left = float(cam['cam_to_right'])
-    right= float(cam['cam_to_left'])
-    y_camera= width*right/(left+right) #rough
-    list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
 
 
@@ -378,7 +369,7 @@ if __name__ == "__main__":
     with open('/Users/wangshuainan/Desktop/mcdc_data/valid/camera_parameter.json', 'r') as f:
         temp = json.loads(f.read())
 
-    only_box = chooseOne(boxes, temp)
+    only_box = chooseOnImprove(boxes, temp)
     class_name, class_score, (x, y, w, h) = only_box
     # print(name, score, x, y, w, h)
     left = int(x - w / 2)
