@@ -103,7 +103,7 @@ def drawBoxOnImg(img,x,y,w,h,p_x,p_y,num):
     cv2.rectangle(img,(int(x),int(y)),(int(x+w),int(y+h)),(127,255,0),5)
     cv2.circle(img, (int(p_x),int(p_y)), 5, (255,0,0),-1) 
     img_path = '../pic/'+str(num)+'.png'
-    cv2.imwrite(img_path,img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
+    cv2.imwrite(img_path,img, [int( cv2.IMWRITE_JPEG_QUALITY), 30])
 
 
 def pipeline(img):
@@ -264,23 +264,23 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     i = 8217
 
     while (True):
-        # if count_frame % 10 == 0:
-        #     print('-----------------------count_frame:',count_frame)
-        # if count_frame > 30:
-        #     break
+        if count_frame % 10 == 0:
+            print('-----------------------count_frame:',count_frame)
+        if count_frame > 300:
+            break
         # get a frame
         ret, img = video.read()
-        if i < 3:
-            img = cv2.imread(car_list[i])
-            i += 1
-        else:
-            break
-        if img is None:
-            print("video.read() fail || video.read() is end!")
-            break
-        # if img is None or ret is None:
+        # if i < 3:
+        #     img = cv2.imread(car_list[i])
+        #     i += 1
+        # else:
+        #     break
+        # if img is None:
         #     print("video.read() fail || video.read() is end!")
         #     break
+        if img is None or ret is None:
+            print("video.read() fail || video.read() is end!")
+            break
 
         # show a frame
         # img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
@@ -380,7 +380,7 @@ if __name__ == "__main__":
     while i<len(car_list):
         img = cv2.imread(car_list[i])
         image_, boxes = pipeline(img)
-        cv2.imwrite('../pic/'+str(i)+'.png',image_, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
+        cv2.imwrite('../pic/'+str(i)+'.png',image_, [int( cv2.IMWRITE_JPEG_QUALITY), 30])
         #only_box = chooseOnImprove(boxes, temp)
         only_box = chooseOnImprove(boxes, temp)
         class_name, class_score, (x, y, w, h) = only_box
