@@ -187,7 +187,7 @@ def chooseOnImprove(list, cam):
             list.remove(iterater)
         elif abs(x_car_mid-p0)>width/5:
             list.remove(iterater)
-        elif p1+h/2>height*0.93
+        elif p1+h/2>height*0.93:
             list.remove(iterater)
             # 和车中点距离过于远：
 
@@ -207,7 +207,7 @@ def chooseOnImprove(list, cam):
     y_camera= width*left/(left+right) #rough
     list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
-    
+
 
 def getFrameGap(time_gap_times):
     time_list = []
