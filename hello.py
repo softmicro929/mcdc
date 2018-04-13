@@ -204,7 +204,7 @@ def chooseOnImprove(list, cam):
     width= float(cam['image_width'])
     left = float(cam['cam_to_right'])
     right= float(cam['cam_to_left'])
-    y_camera= width*left/(left+right) #rough
+    y_camera= width*right/(left+right) #rough
     list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
 
