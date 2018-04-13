@@ -166,6 +166,7 @@ def chooseOne(list, cam):
     list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
 
+
 def chooseOnImprove(list, cam):
     if list is None:
         return None #再说
@@ -175,7 +176,6 @@ def chooseOnImprove(list, cam):
     left = float(cam['cam_to_right'])
     right= float(cam['cam_to_left'])
     x_car_mid= (width*left/(left+right)+width/2)/2 # 加上中点平滑处理一下 有待改进
-    print(list)
     i=0
     while i<len(list):
         iterater = list[i]
@@ -189,16 +189,12 @@ def chooseOnImprove(list, cam):
         #if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
         if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
             list.remove(iterater)
-            print('----1',iterater)
         elif h/w>1.4 : 
             list.remove(iterater)
-            print('----2',iterater)
         elif abs(x_car_mid-p0)>width/7:
             list.remove(iterater)
-            print('----3',iterater)
         elif p1+h>height*0.98:
             list.remove(iterater)
-            print('----4',iterater)
             # 和车中点距离过于远：
         i=i+1
 
@@ -207,7 +203,8 @@ def chooseOnImprove(list, cam):
 
     #y越大越可能是前车
     list = sorted(list, key=lambda x: -x[2][1] )
-    return list[0]  
+
+    return list[0]
 
 
 def getFrameGap(time_gap_times):
@@ -374,6 +371,7 @@ if __name__ == "__main__":
 
     with open('/Users/wangshuainan/Desktop/mcdc_data/valid/camera_parameter.json', 'r') as f:
         temp = json.loads(f.read())
+
 
     car_list = ['/Users/wangshuainan/Desktop/image/1523465188473.jpg',
                 '/Users/wangshuainan/Desktop/image/1523465217730.jpg',
