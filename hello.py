@@ -147,11 +147,13 @@ def pipeline(img):
 def chooseOne(list, cam):
     if list is None:
         return None #再说
-
-    for iterater in list:
+    i=0
+    while i<len(list):
+        iterater = list[i]
         #print(iterater)
-        if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
+        if iterater[0]!=b'car' and iterater[0]!=b'truck' and iterater[0]!=b'bus':
             list.remove(iterater)
+        i = i+1
 
 
     if len(list) == 0:
@@ -173,40 +175,39 @@ def chooseOnImprove(list, cam):
     left = float(cam['cam_to_right'])
     right= float(cam['cam_to_left'])
     x_car_mid= (width*left/(left+right)+width/2)/2 # 加上中点平滑处理一下 有待改进
-
-    for iterater in list:
+    print(list)
+    i=0
+    while i<len(list):
+        iterater = list[i]
         #print(iterater)
         # 中心点，宽度，高度 
         p0=iterater[2][0]
         p1=iterater[2][1]
         w=iterater[2][2]
         h=iterater[2][3]
-        if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
+
+        #if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
+        if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
             list.remove(iterater)
+            print('----1',iterater)
         elif h/w>1.4 : 
             list.remove(iterater)
-        elif abs(x_car_mid-p0)>width/5:
+            print('----2',iterater)
+        elif abs(x_car_mid-p0)>width/7:
             list.remove(iterater)
-        elif p1+h/2>height*0.93:
+            print('----3',iterater)
+        elif p1+h>height*0.98:
             list.remove(iterater)
+            print('----4',iterater)
             # 和车中点距离过于远：
+        i=i+1
 
-    if list is None:
+    if len(list) == 0:
         return None #再说
 
     #y越大越可能是前车
     list = sorted(list, key=lambda x: -x[2][1] )
     return list[0]  
-
-    if list==None:
-        return None #再说
-
-    width= float(cam['image_width'])
-    left = float(cam['cam_to_right'])
-    right= float(cam['cam_to_left'])
-    y_camera= width*left/(left+right) #rough
-    list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
-    return list[0]
 
 
 def getFrameGap(time_gap_times):
@@ -266,23 +267,23 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     i = 8217
 
     while (True):
-        if count_frame % 10 == 0:
-            print('-----------------------count_frame:',count_frame)
-        if count_frame > 30:
-            break
+        # if count_frame % 10 == 0:
+        #     print('-----------------------count_frame:',count_frame)
+        # if count_frame > 30:
+        #     break
         # get a frame
         ret, img = video.read()
-        # if i < 3:
-        #     img = cv2.imread(car_list[i])
-        #     i += 1
-        # else:
-        #     break
-        # if img is None:
-        #     print("video.read() fail || video.read() is end!")
-        #     break
-        if img is None or ret is None:
+        if i < 3:
+            img = cv2.imread(car_list[i])
+            i += 1
+        else:
+            break
+        if img is None:
             print("video.read() fail || video.read() is end!")
             break
+        # if img is None or ret is None:
+        #     print("video.read() fail || video.read() is end!")
+        #     break
 
         # show a frame
         # img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)  # resize image half
@@ -369,31 +370,39 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
 
 if __name__ == "__main__":
     
-    lenna_img = cv2.imread("../data/8217.png")
-    img,_ = pipeline(lenna_img)
-    cv2.imwrite('../pic/1.jpg',img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
-    cv2.imshow("YOLO", img)
-    image_, boxes = pipeline(img)
+    
 
     with open('/Users/wangshuainan/Desktop/mcdc_data/valid/camera_parameter.json', 'r') as f:
         temp = json.loads(f.read())
 
-    only_box = chooseOne(boxes, temp)
-    class_name, class_score, (x, y, w, h) = only_box
-    # print(name, score, x, y, w, h)
-    left = int(x - w / 2)
-    right = int(x + w / 2)
-    top = int(y - h / 2)
-    bottom = int(y + h / 2)
+    car_list = ['/Users/wangshuainan/Desktop/image/1523465188473.jpg',
+                '/Users/wangshuainan/Desktop/image/1523465217730.jpg',
+                '/Users/wangshuainan/Desktop/image/1523465247087.jpg']
+    i=0
+    while i<len(car_list):
+        img = cv2.imread(car_list[i])
+        image_, boxes = pipeline(img)
+        cv2.imwrite('../pic/'+str(i)+'.png',image_, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
+        #only_box = chooseOnImprove(boxes, temp)
+        only_box = chooseOnImprove(boxes, temp)
+        class_name, class_score, (x, y, w, h) = only_box
+        # print(name, score, x, y, w, h)
+        left = int(x - w / 2)
+        right = int(x + w / 2)
+        top = int(y - h / 2)
+        bottom = int(y + h / 2)
 
-    x1, y1 = x, y + int(h/2)
+        x1, y1 = x, y + int(h/2)
 
-    box_x = int(x - w / 2)
-    box_y = int(y - h / 2)
-    box_w = w
-    box_h = h
+        box_x = int(x - w / 2)
+        box_y = int(y - h / 2)
+        box_w = w
+        box_h = h
 
-    drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, 5)
+        drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, i+3)
+
+        i += 1
+            
 
     # lenna_img = cv2.imread("../data/8218.png")
     # img,_ = pipeline(lenna_img)
