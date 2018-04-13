@@ -359,7 +359,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     #     json.dump(final_dict, json_file, ensure_ascii=False)
 
     #video_path传入 封装成函数后改成下面的
-    with open(output_result_json_path,'w') as json_file:
+    with open(output_result_json_path,'w+') as json_file:
         json.dump(final_dict, json_file, ensure_ascii = False)
 
     # cap.release()

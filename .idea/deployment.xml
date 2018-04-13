@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="MCDC_server">
+    <serverData>
+      <paths name="MCDC_server">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/mcdc" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>
