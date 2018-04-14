@@ -266,13 +266,13 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     car_list = ['/Users/wangshuainan/Desktop/image/1523465188473.jpg',
                 '/Users/wangshuainan/Desktop/image/1523465217730.jpg',
                 '/Users/wangshuainan/Desktop/image/1523465247087.jpg']
-    i = 8217
+    i = 0
 
     while (True):
-        if count_frame % 10 == 0:
-            print('-----------------------count_frame:',count_frame)
-        if count_frame > 300:
-            break
+        # if count_frame % 10 == 0:
+        #     print('-----------------------count_frame:',count_frame)
+        # if count_frame > 300:
+        #     break
         # get a frame
         ret, img = video.read()
         # if i < 3:
