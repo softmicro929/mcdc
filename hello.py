@@ -119,9 +119,9 @@ def pipeline(img):
 
     #print(result)
 
-    #toc = time.time()
+    toc = time.time()
     # print('--------------------one frame: time, result')
-    # print(toc - tic, result)
+    print('------------------------pipeline:',toc - tic, result)
     # print('-------------------------------------------')
     img_final = draw_boxes(img, result)
     #img_final = img
@@ -208,7 +208,7 @@ def chooseOnImprove(list, cam):
 
     #y越大越可能是前车
     list = sorted(list, key=lambda x: -x[2][1] )
-
+    print('----------------------choose',list[0])
     return list[0]
 
 
@@ -227,7 +227,7 @@ def getFrameGap(time_gap_times):
 def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param_json_name):
 
     video = cv2.VideoCapture(video_path)
-
+    print('------------open video')
     # # Find OpenCV version
     # (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
     #
@@ -246,8 +246,8 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     count_frame, process_every_n_frame = 0, 1
 
     #"前一帧在图像中选取的点"，用来避免当前帧没有框出车
-    pre_x = 960
-    pre_y = 960
+    pre_x = 960.00
+    pre_y = 960.00
     pre_dis_x = 0
 
     pre_box_x = 0
@@ -259,7 +259,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     time_list = getFrameGap(time_txt_name)
 
     #print(time_list)
-    print('------------read time_txt finished, lines:', len(time_list))
+    print('------------read time_txt finished, lines:', len(time_list),time_txt_name)
 
     result_list = []
 
@@ -270,7 +270,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
 
     while (True):
         # if count_frame % 10 == 0:
-        #     print('-----------------------count_frame:',count_frame)
+        print('-----------------------count_frame:', count_frame)
         # if count_frame > 300:
         #     break
         # get a frame
@@ -318,16 +318,21 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
 
                 pre_x, pre_y = x1, y1
                 pre_box_x, pre_box_y, pre_box_w, pre_box_h = box_x, box_y, box_w, box_h
+                print('------------------only_box is Not null:', x1, y1)
              
             else:
                 x1, y1 = pre_x, pre_y
                 box_x, box_y, box_w, box_h = pre_box_x, pre_box_y, pre_box_w, pre_box_h
+                print('------------------only_box is null', x1, y1)
 
-            drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, i)
+
+            # drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, i)
 
             # 然后计算速度+距离
             # distance_x代表相距前车距离
+            print('--------------------------birdView.getXY---')
             distance_x, distance_y = birdView.getXY(x1, y1)
+            print('--------------------------birdView.getXY---',distance_x, distance_y)
             if count_frame > 0:
                 speed_x = (distance_x - pre_dis_x) / float(
                     float(time_list[count_frame]) - float(time_list[count_frame - 1]))
@@ -354,7 +359,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
 
     smooth_result_list = smooth.smoothData(result_list,time_list)        
     print('=========pipeline finished,result============>')
-    print(result_list)
+    print(smooth_result_list)
     print('=============================================>')
 
     # DO YOUR JSON CONV JOB!!!
@@ -368,7 +373,8 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     with open(output_result_json_path,'w+') as json_file:
         json.dump(final_dict, json_file, ensure_ascii = False)
 
-    # cap.release()
+    print('=========pipeline finished,write json finished============>')
+    video.release()
     # cv2.destroyAllWindows()
 
 if __name__ == "__main__":
