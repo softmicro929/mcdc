@@ -9,6 +9,7 @@ import darknet as dn
 import bird_view_projection as birdView
 import json
 import CONFIG_SERVER_TEST as CONFIG
+import smooth as smooth
 
 # prepare YOLO
 dn.set_gpu(0)
@@ -347,12 +348,13 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             count_frame += 1
             i += 1
 
+    smooth_result_list = smooth.smoothData(result_list,time_list)        
     print('=========pipeline finished,result============>')
     print(result_list)
     print('=============================================>')
 
     # DO YOUR JSON CONV JOB!!!
-    final_dict = {'frame_data': result_list}
+    final_dict = {'frame_data': smooth_result_list}
 
     # # with open不用考虑关闭流和异常
     # with open(output_result_json_path, 'w') as json_file:
