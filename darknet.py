@@ -3,7 +3,7 @@ from ctypes import *
 import math
 import random
 import cv2
-
+import CONFIG_SERVER_TEST as CONFIG
 def sample(probs):
     s = sum(probs)
     probs = [a/s for a in probs]
@@ -47,7 +47,12 @@ class METADATA(Structure):
     
 
 #lib = CDLL("/home/pjreddie/documents/darknet/libdarknet.so", RTLD_GLOBAL)
-lib = CDLL("../libdarknet.so", RTLD_GLOBAL)
+#lib = CDLL("../libdarknet.so", RTLD_GLOBAL)
+lib = CDLL(CONFIG.DARKNET_DIR+"libdarknet.so", RTLD_GLOBAL)
+
+
+
+
 lib.network_width.argtypes = [c_void_p]
 lib.network_width.restype = c_int
 lib.network_height.argtypes = [c_void_p]
@@ -179,7 +184,10 @@ def drawBoxOnImg(img,x,y,w,h,num):
     #img图像，起点坐标，终点坐标（在这里是x+w,y+h,因为w,h分别是人脸的长宽）颜色，线宽）
     cv2.rectangle(img,(int(x),int(y)),(int(x+w),int(y+h)),(127,255,0),2)
     # cv2.circle(img, (int(p_x),int(p_y)), 2, (255,0,0),-1) 
-    img_path = '../pic/'+str(num)+'.png'
+    #img_path = '../pic/'+str(num)+'.png'
+    img_path = CONFIG.DARKNET_DIR+'pic/'+str(num)+'.png'
+
+
     cv2.imwrite(img_path,img, [int( cv2.IMWRITE_JPEG_QUALITY), 95])
 
 if __name__ == "__main__":
@@ -188,12 +196,12 @@ if __name__ == "__main__":
     #meta = load_meta("cfg/imagenet1k.data")
     #r = classify(net, meta, im)
     #print r[:10]
-    net = load_net(str.encode('../cfg/yolov3.cfg'), str.encode('../yolov3.weights'), 0)
-    meta = load_meta(str.encode("../cfg/coco.data"))
-    r = detect(net, meta, str.encode("../data/dog.jpg"))
+    net = load_net(str.encode(CONFIG.DARKNET_DIR+'cfg/yolov3.cfg'), str.encode(CONFIG.DARKNET_DIR+'yolov3.weights'), 0)
+    meta = load_meta(str.encode(CONFIG.DARKNET_DIR+"cfg/coco.data"))
+    r = detect(net, meta, str.encode(CONFIG.DARKNET_DIR+"data/dog.jpg"))
     print (r)
 
-    lenna_img = cv2.imread("../data/dog.jpg")
+    lenna_img = cv2.imread(CONFIG.DARKNET_DIR+"data/dog.jpg")
     im = array_to_image(lenna_img)
     rgbgr_image(im)
     r1 = detect1(net,meta,im)
