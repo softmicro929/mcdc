@@ -13,9 +13,9 @@ import smooth as smooth
 
 # prepare YOLO
 dn.set_gpu(0)
-net = dn.load_net(str.encode("../cfg/yolov3.cfg"),
-                  str.encode("../yolov3.weights"), 0)
-meta = dn.load_meta(str.encode("../cfg/coco.data"))
+net = dn.load_net(str.encode(CONFIG.DARKNET_DIR+"cfg/yolov3.cfg"),
+                  str.encode(CONFIG.DARKNET_DIR+"yolov3.weights"), 0)
+meta = dn.load_meta(str.encode(CONFIG.DARKNET_DIR+"cfg/coco.data"))
 
 # box colors
 box_colors = None
@@ -43,7 +43,7 @@ def draw_boxes(img, result):
 
     image = Image.fromarray(img)
 
-    font = ImageFont.truetype(str.encode('../font/FiraMono-Medium.otf'), 20)
+    font = ImageFont.truetype(str.encode(CONFIG.DARKNET_DIR+'font/FiraMono-Medium.otf'), 20)
     thickness = (image.size[0] + image.size[1]) // 300
 
     num_classes = len(result)
@@ -103,7 +103,7 @@ def drawBoxOnImg(img,x,y,w,h,p_x,p_y,num):
     #img图像，起点坐标，终点坐标（在这里是x+w,y+h,因为w,h分别是人脸的长宽）颜色，线宽）
     cv2.rectangle(img,(int(x),int(y)),(int(x+w),int(y+h)),(127,255,0),5)
     cv2.circle(img, (int(p_x),int(p_y)), 5, (255,0,0),-1) 
-    img_path = '../pic/'+str(num)+'.png'
+    img_path = CONFIG.DARKNET_DIR+'pic/'+str(num)+'.png'
     cv2.imwrite(img_path,img, [int( cv2.IMWRITE_JPEG_QUALITY), 30])
 
 
@@ -190,12 +190,16 @@ def chooseOnImprove(list, cam):
         #if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
         if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
             list.remove(iterater)
+            continue;
         elif h/w>1.4 : 
             list.remove(iterater)
+            continue
         elif abs(x_car_mid-p0)>width/7:
             list.remove(iterater)
+            continue
         elif p1+h>height*0.98:
             list.remove(iterater)
+            continue
             # 和车中点距离过于远：
         i=i+1
 
@@ -292,7 +296,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             # cv2.imshow("YOLO", pipeline(img))
             #  res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
             image_, boxes = pipeline(img)
-            only_box = chooseOne(boxes, temp)
+            only_box = chooseOnImprove(boxes, temp)
 
             # 如果定位框返回空的话，用前面的框
             if only_box is not None:
@@ -361,7 +365,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     #     json.dump(final_dict, json_file, ensure_ascii=False)
 
     #video_path传入 封装成函数后改成下面的
-    with open(output_result_json_path,'w') as json_file:
+    with open(output_result_json_path,'w+') as json_file:
         json.dump(final_dict, json_file, ensure_ascii = False)
 
     # cap.release()
