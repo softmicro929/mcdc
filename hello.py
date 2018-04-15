@@ -361,6 +361,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     print(smooth_result_list)
     print('=============================================>')
 
+    tmp_dict = {'frame_data': result_list}
     # DO YOUR JSON CONV JOB!!!
     final_dict = {'frame_data': smooth_result_list}
 
