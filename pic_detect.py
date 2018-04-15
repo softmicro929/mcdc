@@ -184,7 +184,6 @@ def chooseOnImprove(pic_list):
         w = iterater[2][2]
         h = iterater[2][3]
 
-        # if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
         if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
             pic_list.remove(iterater)
             continue
@@ -194,13 +193,58 @@ def chooseOnImprove(pic_list):
         elif abs(x_car_mid - p0) > width / 5:
             pic_list.remove(iterater)
             continue
-        #elif p1 > height * 0.9 and w > width*0.8:
-        elif p1+h/2 > height * 0.98 and w > width*0.8:
+        # elif p1 > height * 0.9 and w > width*0.8:
+        elif p1 + h / 2 > height * 0.92 and w > width * 0.7 and h < height * 0.4:
+            pic_list.remove(iterater)
+            continue
+        i = i + 1
+
+    if len(pic_list) == 0:
+        return None  # 再说
+
+    pic_list = sorted(pic_list, key=lambda x: -x[2][1])
+    print('----------------------choose', pic_list[0])
+    return pic_list[0]
+
+
+def chooseOneWithWeight(pic_list):
+    #   1/distant to midLine  2/distant to loweres line
+    #   3/angle to mid point    4/area of rectangle     5/IOU between rectangles
+    if pic_list is None:
+        return None  # 再说
+
+    width = float(2304)
+    height = float(1296)
+    left = 0.7
+    right = 1.0
+    #x_car_mid = (width * left / (left + right) + width / 2) / 2  # 加上中点平滑处理一下 有待改进
+    x_car_mid = width*left/(left+right)/5 + width*2/5
+
+    i = 0
+    while i < len(pic_list):
+        iterater = pic_list[i]
+        # print(iterater)
+        # 中心点，宽度，高度
+        p0 = iterater[2][0]
+        p1 = iterater[2][1]
+        w = iterater[2][2]
+        h = iterater[2][3]
+
+        # if iterater[0]!='car' and iterater[0]!='truck' and iterater[0]!='bus':
+        if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
+            pic_list.remove(iterater)
+            continue
+        elif abs(x_car_mid - p0) > width / 4:  # too far from mid line
+            pic_list.remove(iterater)
+            continue
+        # elif p1 > height * 0.9 and w > width*0.8:
+        elif p1+h/2 > height * 0.9 and w > width*0.6 and h < 0.4 * height:
             pic_list.remove(iterater)
             continue
             # 和车中点距离过于远：
         i = i + 1
 
+    #
     if len(pic_list) == 0:
         return None  # 再说
 
