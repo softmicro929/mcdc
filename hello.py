@@ -162,7 +162,6 @@ def chooseOne(list, cam):
     list = sorted(list, key=lambda x: abs( y_camera-(x[2][0]+x[2][2]/2) ) )
     return list[0]
 
-
 def chooseOnImprove(list, cam):
     if list is None:
         return None #再说
@@ -206,10 +205,53 @@ def chooseOnImprove(list, cam):
         return None #再说
 
     #y越大越可能是前车
-    list = sorted(list, key=lambda x: -x[2][1] )
-    print('----------------------choose',list[0])
+    list = sorted(list, key=lambda x: -x[2][1])
+    print('----------------------choose', list[0])
     return list[0]
 
+def chooseOnImprove2(pic_list, cam):
+    if pic_list is None:
+        return None  # 再说
+
+    width = float(cam['image_width'])
+    height= float(cam['image_height'])
+    left = float(cam['cam_to_right'])
+    right= float(cam['cam_to_left'])
+    x_car_mid = (width * left / (left + right) + width / 2) / 2  # 加上中点平滑处理一下 有待改进
+    # x_car_mid=width/2
+    # x_car_mid= width*left/(left+right)/5 +width*2/5
+
+    i = 0
+    while i < len(pic_list):
+        iterater = pic_list[i]
+        # print(iterater)
+        # 中心点，宽度，高度
+        p0 = iterater[2][0]
+        p1 = iterater[2][1]
+        w = iterater[2][2]
+        h = iterater[2][3]
+
+        if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
+            pic_list.remove(iterater)
+            continue
+        # elif h / w > 1.4:
+        #     pic_list.remove(iterater)
+        #     continue
+        elif abs(x_car_mid - p0) > width / 5:
+            pic_list.remove(iterater)
+            continue
+        # elif p1 > height * 0.9 and w > width*0.8:
+        elif p1+h/2 > height * 0.92 and w > width*0.7 and h < height * 0.4:
+            pic_list.remove(iterater)
+            continue
+        i = i + 1
+
+    if len(pic_list) == 0:
+        return None  # 再说
+
+    pic_list = sorted(pic_list, key=lambda x: -x[2][1])
+    # print('----------------------choose', pic_list[0])
+    return pic_list[0]
 
 def getFrameGap(time_gap_times):
     time_list = []
@@ -295,7 +337,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             # cv2.imshow("YOLO", pipeline(img))
             #  res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
             image_, boxes = pipeline(img)
-            only_box = chooseOnImprove(boxes, temp)
+            only_box = chooseOnImprove2(boxes, temp)
 
             # 如果定位框返回空的话，用前面的框
             if only_box is not None:
