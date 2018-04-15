@@ -117,12 +117,8 @@ def pipeline(img):
     tic = time.time()
     result = dn.detect1(net, meta, im)
 
-    #print(result)
-
     toc = time.time()
-    # print('--------------------one frame: time, result')
-    print('------------------------pipeline:',toc - tic, result)
-    # print('-------------------------------------------')
+    #print('------------------------pipeline:',toc - tic, result)
     img_final = draw_boxes(img, result)
     #img_final = img
     return img_final, result
@@ -156,7 +152,6 @@ def chooseOne(list, cam):
             list.remove(iterater)
         i = i+1
 
-
     if len(list) == 0:
         return None #再说
 
@@ -177,6 +172,10 @@ def chooseOnImprove(list, cam):
     left = float(cam['cam_to_right'])
     right= float(cam['cam_to_left'])
     x_car_mid= (width*left/(left+right)+width/2)/2 # 加上中点平滑处理一下 有待改进
+    #x_car_mid=width/2
+    #x_car_mid= width*left/(left+right)/5 +width*2/5
+
+
     i=0
     while i<len(list):
         iterater = list[i]
@@ -194,7 +193,7 @@ def chooseOnImprove(list, cam):
         elif h/w>1.4 : 
             list.remove(iterater)
             continue
-        elif abs(x_car_mid-p0)>width/7:
+        elif abs(x_car_mid-p0)>width/4:
             list.remove(iterater)
             continue
         elif p1+h>height*0.98:
@@ -239,7 +238,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     #     print ("Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}".format(fps))
 
     birdView.setCameraParams(camera_param_json_name)
-    # cpy plus at 4.11.19:27
+
     with open(camera_param_json_name, 'r') as f:
         temp = json.loads(f.read())
 
