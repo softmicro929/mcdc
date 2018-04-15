@@ -29,6 +29,9 @@
 # TEST_VIDEO_DIR='/home/m10/mytest/valid/'
 # DARKNET_DIR= '/home/m10/workspace/darknet/'
 
+# pic test
+# WRITE_JSON_DIR='/home/m10/mytest/valid/'
+DARKNET_DIR = '/home/m10/workspace/darknet/'
 
 #测试数据所在路径、|||||||||||||||||||||||||||||||||
 
