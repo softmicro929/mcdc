@@ -103,8 +103,8 @@ def drawBoxOnImg(img,x,y,w,h,p_x,p_y,num):
     #img图像，起点坐标，终点坐标（在这里是x+w,y+h,因为w,h分别是人脸的长宽）颜色，线宽）
     cv2.rectangle(img,(int(x),int(y)),(int(x+w),int(y+h)),(127,255,0),5)
     cv2.circle(img, (int(p_x),int(p_y)), 5, (255,0,0),-1) 
-    img_path = CONFIG.DARKNET_DIR+'pic/'+str(num)+'.png'
-    cv2.imwrite(img_path,img, [int( cv2.IMWRITE_JPEG_QUALITY), 30])
+    img_path = CONFIG.DARKNET_DIR+'pic/'+str(num)+'.jpg'
+    cv2.imwrite(img_path,img, [int( cv2.IMWRITE_JPEG_QUALITY), 20])
 
 
 def pipeline(img):
