@@ -415,6 +415,10 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     with open(output_result_json_path,'w+') as json_file:
         json.dump(final_dict, json_file, ensure_ascii = False)
 
+    # row data to file:
+    with open('/home/m10/workspace/darknet/rowdata.json','w+') as row_json_file:
+        json.dump(tmp_dict, row_json_file, ensure_ascii = False)
+
     print('=========pipeline finished,write json finished============>')
     video.release()
     # cv2.destroyAllWindows()
