@@ -264,9 +264,10 @@ def getFrameGap(time_gap_times):
     time_f.close()
     return time_list
 
+frameid = 0
 
 def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param_json_name):
-
+    global frameid
     video = cv2.VideoCapture(video_path)
     print('------------open video')
     # # Find OpenCV version
@@ -367,7 +368,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
                 print('------------------only_box is null', x1, y1)
 
 
-            drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, i)
+            drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, frameid)
 
             # 然后计算速度+距离
             # distance_x代表相距前车距离
@@ -397,6 +398,8 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             result_list.append(dict)
             count_frame += 1
             i += 1
+
+            frameid += 1
 
     smooth_result_list = smooth.smoothData(result_list,time_list)        
     print('=========pipeline finished,result============>')
