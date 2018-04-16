@@ -13,7 +13,7 @@ def smoothDistance(list):
     min_threshold_x = -max_threshold_x
 
     smooth_x_list = [x-1 for x in list]
-    smooth_x_list.append(list[0])
+
     for i in range(1, len(list)):
         x0 = smooth_x_list[i - 1]
         x1 = smooth_x_list[i]
@@ -36,7 +36,7 @@ def smoothVelocity(smooth_x_list,time_list):
 
     beta = 0.7
     max_threshold_v = 0.8
-
+    print('----------smoothVelocity:',len(smooth_x_list), len(time_list))
     smooth_v_list = []
 
     smooth_v_list.append((smooth_x_list[1] - smooth_x_list[0])/float(float(time_list[1]) - float(time_list[0])))
