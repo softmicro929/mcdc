@@ -367,7 +367,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
                 print('------------------only_box is null', x1, y1)
 
 
-            # drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, i)
+            drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, i)
 
             # 然后计算速度+距离
             # distance_x代表相距前车距离
