@@ -218,6 +218,7 @@ def smoothDistance(list):
     return smooth_x_list
 
 def testVideo(start, end):
+    '/Users/wangshuainan/Desktop/result/test2/'
     pre_filepath = '/Users/wangshuainan/Desktop/valid_video_01_pre.json'
     real_filepath = '/Users/wangshuainan/Desktop/mcdc_data/valid/valid_video_00_gt.json'
     with open(pre_filepath) as f:
