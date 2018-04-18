@@ -387,7 +387,7 @@ def changeCoordinate(bboxes):
     # [ car, x,y,w,h] -> ( car, 0, (x_mid,y_mid,w,h) )
     res = []
     for i in range(len(bboxes)):
-        res.append((bboxes[i][0], 0,
+        res.append((bboxes[i][0], 0.9,
                     (bboxes[i][1] + bboxes[i][3] / 2, bboxes[i][2] + bboxes[i][4] / 2, bboxes[i][3], bboxes[i][4])))
 
     return res
