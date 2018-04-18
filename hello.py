@@ -383,9 +383,8 @@ def getFrameGap(time_gap_times):
     return time_list
 
 
-[01234]
 def changeCoordinate(bboxes):
-    # [ [],[],[]]
+    # [ car, x,y,w,h] -> ( car, 0, (x_mid,y_mid,w,h) )
     res = []
     for i in range(len(bboxes)):
         res.append((bboxes[i][0], 0,
