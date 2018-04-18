@@ -383,13 +383,14 @@ def getFrameGap(time_gap_times):
     return time_list
 
 
-
+[01234]
 def changeCoordinate(bboxes):
     # [ [],[],[]]
     res = []
     for i in range(len(bboxes)):
-        res.append([bboxes[i][0], bboxes[i][2][0] + bboxes[i][2][2] / 2, bboxes[i][2][1] + bboxes[i][2][3] / 2,
-                    bboxes[i][2][2], bboxes[i][2][3]])
+        res.append((bboxes[i][0], 0,
+                    (bboxes[i][1] + bboxes[i][3] / 2, bboxes[i][2] + bboxes[i][4] / 2, bboxes[i][3], bboxes[i][4])))
+
     return res
 
 
