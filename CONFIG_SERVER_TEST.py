@@ -1,9 +1,10 @@
 # -*- encoding:utf-8 -*-
 
-# VALID_VIDEO_PATH = '/data/mcdc_data/02/valid/'
-# CAMERA_PARAMETER_PATH = '/data/mcdc_data/02/valid/camera_parameter.json'
-# WRITE_JSON_DIR='/home/m10/workspace/darknet/mcdc/'
-# TEST_VIDEO_DIR='/data/mcdc_data/02/valid/'
+VALID_VIDEO_PATH = '/data/mcdc_data/02/valid/'
+CAMERA_PARAMETER_PATH = '/data/mcdc_data/02/valid/camera_parameter.json'
+WRITE_JSON_DIR='/home/m10/workspace/darknet/mcdc/'
+TEST_VIDEO_DIR='/data/mcdc_data/02/valid/'
+DARKNET_DIR= '/home/m10/workspace/darknet/'
 
 
 
@@ -15,11 +16,11 @@
 # DARKNET_DIR= '/home/m10/workspace/darknet/'
 
 
-VALID_VIDEO_PATH = '/data/mcdc_data/test/'
-CAMERA_PARAMETER_PATH = '/data/mcdc_data/test/camera_parameter.json'
-WRITE_JSON_DIR='/home/m10/test_pre/'
-TEST_VIDEO_DIR='/data/mcdc_data/test/'
-DARKNET_DIR= '/home/m10/workspace/darknet/'
+# VALID_VIDEO_PATH = '/data/mcdc_data/test/'
+# CAMERA_PARAMETER_PATH = '/data/mcdc_data/test/camera_parameter.json'
+# WRITE_JSON_DIR='/home/m10/test_pre/'
+# TEST_VIDEO_DIR='/data/mcdc_data/test/'
+# DARKNET_DIR= '/home/m10/workspace/darknet/'
 
 
 #  test

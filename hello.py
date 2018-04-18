@@ -1,6 +1,7 @@
 # -*- encoding:utf-8 -*-
 import time
 import random
+import math
 import colorsys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -237,6 +238,50 @@ def chooseOnImprove2(pic_list, cam):
         # elif h / w > 1.4:
         #     pic_list.remove(iterater)
         #     continue
+        elif abs(x_car_mid - p0) > width / 6:
+            pic_list.remove(iterater)
+            continue
+        # elif p1 > height * 0.9 and w > width*0.8:
+        elif p1+h/2 > height * 0.92 and w > width*0.7 and h < height * 0.4:
+            pic_list.remove(iterater)
+            continue
+        i = i + 1
+
+    if len(pic_list) == 0:
+        return None  # 再说
+
+    pic_list = sorted(pic_list, key=lambda x: -x[2][1])
+    # print('----------------------choose', pic_list[0])
+    return pic_list[0]
+
+def chooseOneImproveWithTracking(pic_list, cam, pre__x, pre__y, pre__w):
+    if pic_list is None:
+        return None  # 再说
+    #print(str(pre__x) + " " + str(pre__y) + " " + str(pre__w))
+    width = float(cam['image_width'])
+    height= float(cam['image_height'])
+    left = float(cam['cam_to_right'])
+    right= float(cam['cam_to_left'])
+    x_car_mid = (width * left / (left + right) + width / 2) / 2  # 加上中点平滑处理一下 有待改进
+
+    i = 0
+    while i < len(pic_list):
+        iterater = pic_list[i]
+        # print(iterater)
+        # 中心点，宽度，高度
+        p0 = iterater[2][0]
+        p1 = iterater[2][1]
+        w = iterater[2][2]
+        h = iterater[2][3]
+
+        dist2 = math.sqrt((p0-w/2-pre__x)*(p0-w/2-pre__x)+(p1-h/2-pre__y)*(p1-h/2-pre__y))
+        #print( str(dist2)+" "+str(pre__w/3))
+        if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
+            pic_list.remove(iterater)
+            continue
+        elif dist2 > pre__w/3:
+            pic_list.remove(iterater)
+            continue
         elif abs(x_car_mid - p0) > width / 5:
             pic_list.remove(iterater)
             continue
@@ -252,6 +297,80 @@ def chooseOnImprove2(pic_list, cam):
     pic_list = sorted(pic_list, key=lambda x: -x[2][1])
     # print('----------------------choose', pic_list[0])
     return pic_list[0]
+
+def chooseBBoxImprove_line_colapse(pic_list,cam):
+    if pic_list is None:
+        return None  # 再说
+
+    width = float(cam['image_width'])
+    height= float(cam['image_height'])
+    left = float(cam['cam_to_right'])
+    right= float(cam['cam_to_left'])
+    x_car_mid = width * left / (left + right)/3 + width / 3  # 加上中点平滑处理一下 有待改进
+    # x_car_mid=width/2
+    # x_car_mid= width*left/(left+right)/5 +width*2/5
+
+    i = 0
+    while i < len(pic_list):
+        iterater = pic_list[i]
+        # print(iterater)
+        # 中心点，宽度，高度
+        p0 = iterater[2][0]
+        p1 = iterater[2][1]
+        w = iterater[2][2]
+        h = iterater[2][3]
+
+        if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
+            pic_list.remove(iterater)
+            continue
+        elif abs(x_car_mid - p0) > width / 5:
+            pic_list.remove(iterater)
+            continue
+        # elif p1 > height * 0.9 and w > width*0.8:
+        elif p1 + h / 2 > height * 0.92 and w > width * 0.7 and h < height * 0.4:
+            pic_list.remove(iterater)
+            continue
+        i = i + 1
+
+    if len(pic_list) == 0:
+        return None  # 再说
+
+    pic_list = sorted(pic_list, key=lambda x: abs(x[2][0]-x_car_mid))
+    # sort by distants to car_mid_line
+
+    res=-1
+    l=len(pic_list)
+    for i in range(l):
+        flag= True
+        bboxi=pic_list[i]
+        for j in range(i+1,l):
+            bboxj=pic_list[j]
+            # if no collapse ,stil true; else flag=false
+            if judgeOk(bboxi, bboxj):
+                continue
+            else:
+                flag = False
+                break
+        if flag:
+            res = i
+            break
+
+    if res != -1:
+        #print('----------------------choose', pic_list[0])
+        return pic_list[res]
+    else:
+        pic_list = sorted(pic_list, key=lambda x: -x[2][1])
+        #print('----------------------choose', pic_list[0])
+        return pic_list[0]
+
+def judgeOk(bboxi, bboxj):
+    if bboxi[2][1]+bboxi[2][3]/2 > bboxj[2][1]+bboxj[2][3]/2:
+        return True
+
+    if bboxj[2][0]-bboxj[2][2]/2>bboxi[2][0]+bboxi[2][2]/2 or bboxj[2][0]+bboxj[2][2]/2<bboxi[2][0]-bboxi[2][2]/2:
+        return True
+
+    return False
 
 def getFrameGap(time_gap_times):
     time_list = []
@@ -292,10 +411,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     pre_y = 960.00
     pre_dis_x = 0
 
-    pre_box_x = 0
-    pre_box_y = 0
-    pre_box_w = 0
-    pre_box_h = 0
+
 
     # 将时间差读进list
     time_list = getFrameGap(time_txt_name)
@@ -311,8 +427,11 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     i = 0
 
     while (True):
+        #print( str(pre_box_x)+" "+str(pre_box_y)+" "+str(pre_box_w))
         # if count_frame % 10 == 0:
-        print('-----------------------count_frame:', count_frame)
+        #print('-----------------------count_frame:', count_frame)
+        if frameid % 100 == 0:
+            print('-----------------------frameid:', frameid)
         # if count_frame > 300:
         #     break
         # get a frame
@@ -338,7 +457,12 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             # cv2.imshow("YOLO", pipeline(img))
             #  res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
             image_, boxes = pipeline(img)
-            only_box = chooseOnImprove2(boxes, temp)
+            #only_box = chooseOnImprove2(boxes, temp)
+
+            if i > 0:
+                only_box = chooseOneImproveWithTracking(boxes, temp, pre_box_x, pre_box_y, pre_box_w)
+            else:
+                only_box = chooseOnImprove2(boxes, temp)
 
             # 如果定位框返回空的话，用前面的框
             if only_box is not None:
@@ -360,21 +484,20 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
 
                 pre_x, pre_y = x1, y1
                 pre_box_x, pre_box_y, pre_box_w, pre_box_h = box_x, box_y, box_w, box_h
-                print('------------------only_box is Not null:', x1, y1)
+                #print('------------------only_box is Not null:', x1, y1)
              
             else:
                 x1, y1 = pre_x, pre_y
                 box_x, box_y, box_w, box_h = pre_box_x, pre_box_y, pre_box_w, pre_box_h
-                print('------------------only_box is null', x1, y1)
-
+                print('the '+str(i)+' pic------------------only_box is null', x1, y1)
 
             drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, frameid)
 
             # 然后计算速度+距离
             # distance_x代表相距前车距离
-            print('--------------------------birdView.getXY---')
+            #print('--------------------------birdView.getXY---')
             distance_x, distance_y = birdView.getXY(x1, y1)
-            print('--------------------------birdView.getXY---',distance_x, distance_y)
+            #print('--------------------------birdView.getXY---',distance_x, distance_y)
             if count_frame > 0:
                 speed_x = (distance_x - pre_dis_x) / float(
                     float(time_list[count_frame]) - float(time_list[count_frame - 1]))
@@ -443,7 +566,7 @@ if __name__ == "__main__":
         image_, boxes = pipeline(img)
         cv2.imwrite('../pic/'+str(i)+'.png',image_, [int( cv2.IMWRITE_JPEG_QUALITY), 30])
         #only_box = chooseOnImprove(boxes, temp)
-        only_box = chooseOnImprove(boxes, temp)
+        only_box = chooseOnImprove2(boxes, temp)
         class_name, class_score, (x, y, w, h) = only_box
         # print(name, score, x, y, w, h)
         left = int(x - w / 2)

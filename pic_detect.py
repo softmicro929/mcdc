@@ -207,6 +207,131 @@ def chooseOnImprove(pic_list):
     return pic_list[0]
 
 
+
+def chooseOneImproveWithTracking(pic_list):
+    if pic_list is None:
+        return None  # 再说
+
+    width = float(2304)
+    height = float(1296)
+    left = 0.7
+    right = 1.0
+    x_car_mid = (width * left / (left + right) + width / 2) / 2  # 加上中点平滑处理一下 有待改进
+    # x_car_mid=width/2
+    # x_car_mid= width*left/(left+right)/5 +width*2/5
+
+    i = 0
+    while i < len(pic_list):
+        iterater = pic_list[i]
+        # print(iterater)
+        # 中心点，宽度，高度
+        p0 = iterater[2][0]
+        p1 = iterater[2][1]
+        w = iterater[2][2]
+        h = iterater[2][3]
+
+        if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
+            pic_list.remove(iterater)
+            continue
+        # elif h / w > 1.4:
+        #     pic_list.remove(iterater)
+        #     continue
+        elif abs(x_car_mid - p0) > width / 5:
+            pic_list.remove(iterater)
+            continue
+        # elif p1 > height * 0.9 and w > width*0.8:
+        elif p1 + h / 2 > height * 0.92 and w > width * 0.7 and h < height * 0.4:
+            pic_list.remove(iterater)
+            continue
+        i = i + 1
+
+    if len(pic_list) == 0:
+        return None  # 再说
+
+    pic_list = sorted(pic_list, key=lambda x: -x[2][1])
+    print('----------------------choose', pic_list[0])
+    return pic_list[0]
+
+def chooseBBoxImprove_line_colapse(pic_list):
+    if pic_list is None:
+        return None  # 再说
+
+    width = float(2304)
+    height = float(1296)
+    left = 0.7
+    right = 1.0
+    x_car_mid = (width * left / (left + right) + width / 2) / 2  # 加上中点平滑处理一下 有待改进
+    # x_car_mid=width/2
+    # x_car_mid= width*left/(left+right)/5 +width*2/5
+
+    i = 0
+    while i < len(pic_list):
+        iterater = pic_list[i]
+        # print(iterater)
+        # 中心点，宽度，高度
+        p0 = iterater[2][0]
+        p1 = iterater[2][1]
+        w = iterater[2][2]
+        h = iterater[2][3]
+
+        if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
+            pic_list.remove(iterater)
+            continue
+        # elif h / w > 1.4:
+        #     pic_list.remove(iterater)
+        #     continue
+        elif abs(x_car_mid - p0) > width / 5:
+            pic_list.remove(iterater)
+            continue
+        # elif p1 > height * 0.9 and w > width*0.8:
+        elif p1 + h / 2 > height * 0.92 and w > width * 0.7 and h < height * 0.4:
+            pic_list.remove(iterater)
+            continue
+        i = i + 1
+
+    if len(pic_list) == 0:
+        return None  # 再说
+
+    #pic_list = sorted(pic_list, key=lambda x: -x[2][1])
+    pic_list = sorted(pic_list, key=lambda x: abs(x[2][1]-x_car_mid))
+    # sort by distants to car_mid_line
+
+    res=-1
+    l=len(pic_list)
+    for i in range(l):
+        flag= True
+        bboxi=pic_list[i]
+        for j in range(i+1,l):
+            bboxj=pic_list[j]
+            # if no collapse ,stil true; else flag=false
+            if judgeOk(bboxi, bboxj):
+                continue
+            else:
+                flag = False
+                break
+        if flag:
+            res = i
+            break
+
+    print('----------------------choose', pic_list[0])
+    if res != -1:
+        return pic_list[res]
+    else:
+        pic_list = sorted(pic_list, key=lambda x: -x[2][1])
+        print('----------------------choose', pic_list[0])
+        return pic_list[0]
+
+def judgeOk(bboxi, bboxj):
+    if bboxi[2][1]+bboxi[2][3]/2 > bboxj[2][1]+bboxj[2][3]/2:
+        return True
+
+    if bboxj[2][0]>bboxi[2][0]+bboxi[2][2] or bboxj[2][0]+bboxj[2][2]<bboxi[2][0]:
+        return True
+
+    return False
+
+
+
 def chooseOneWithWeight(pic_list):
     #   1/distant to midLine  2/distant to loweres line
     #   3/angle to mid point    4/area of rectangle     5/IOU between rectangles
