@@ -175,7 +175,6 @@ def chooseOnImprove(list, cam):
     #x_car_mid=width/2
     #x_car_mid= width*left/(left+right)/5 +width*2/5
 
-
     i=0
     while i<len(list):
         iterater = list[i]
@@ -211,6 +210,7 @@ def chooseOnImprove(list, cam):
     return list[0]
 
 def chooseOnImprove2(pic_list, cam):
+    # remove self car
     if pic_list is None:
         return None  # 再说
 
@@ -257,7 +257,6 @@ def chooseOnImprove2(pic_list, cam):
 def chooseOneImproveWithTracking(pic_list, cam, pre__x, pre__y, pre__w):
     if pic_list is None:
         return None  # 再说
-    #print(str(pre__x) + " " + str(pre__y) + " " + str(pre__w))
     width = float(cam['image_width'])
     height= float(cam['image_height'])
     left = float(cam['cam_to_right'])
@@ -276,7 +275,7 @@ def chooseOneImproveWithTracking(pic_list, cam, pre__x, pre__y, pre__w):
 
         dist2 = math.sqrt((p0-w/2-pre__x)*(p0-w/2-pre__x)+(p1-h/2-pre__y)*(p1-h/2-pre__y))
         #print( str(dist2)+" "+str(pre__w/3))
-        if not (iterater[0] == b'car' or iterater[0] == b'truck' or iterater[0] == b'bus'):
+        if not (iterater[0] == u'car' or iterater[0] == u'truck' or iterater[0] == u'bus'):
             pic_list.remove(iterater)
             continue
         elif dist2 > pre__w/3:
@@ -367,7 +366,7 @@ def judgeOk(bboxi, bboxj):
     if bboxi[2][1]+bboxi[2][3]/2 > bboxj[2][1]+bboxj[2][3]/2:
         return True
 
-    if bboxj[2][0]-bboxj[2][2]/2>bboxi[2][0]+bboxi[2][2]/2 or bboxj[2][0]+bboxj[2][2]/2<bboxi[2][0]-bboxi[2][2]/2:
+    if bboxj[2][0]-bboxj[2][2]/2 > bboxi[2][0]+bboxi[2][2]/2 or bboxj[2][0]+bboxj[2][2]/2<bboxi[2][0]-bboxi[2][2]/2:
         return True
 
     return False
@@ -382,6 +381,17 @@ def getFrameGap(time_gap_times):
         time_list.append(line)
     time_f.close()
     return time_list
+
+
+
+def changeCoordinate(bboxes):
+    # [ [],[],[]]
+    res = []
+    for i in range(len(bboxes)):
+        res.append([bboxes[i][0], bboxes[i][2][0] + bboxes[i][2][2] / 2, bboxes[i][2][1] + bboxes[i][2][3] / 2,
+                    bboxes[i][2][2], bboxes[i][2][3]])
+    return res
+
 
 frameid = 0
 
@@ -410,8 +420,6 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
     pre_x = 960.00
     pre_y = 960.00
     pre_dis_x = 0
-
-
 
     # 将时间差读进list
     time_list = getFrameGap(time_txt_name)
@@ -459,10 +467,11 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
             image_, boxes = pipeline(img)
             #only_box = chooseOnImprove2(boxes, temp)
 
+            boxex_mid_point = changeCoordinate(boxes)
             if i > 0:
-                only_box = chooseOneImproveWithTracking(boxes, temp, pre_box_x, pre_box_y, pre_box_w)
+                only_box = chooseOneImproveWithTracking(boxex_mid_point, temp, pre_box_x, pre_box_y, pre_box_w)
             else:
-                only_box = chooseOnImprove2(boxes, temp)
+                only_box = chooseOnImprove2(boxex_mid_point, temp)
 
             # 如果定位框返回空的话，用前面的框
             if only_box is not None:
@@ -491,7 +500,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
                 box_x, box_y, box_w, box_h = pre_box_x, pre_box_y, pre_box_w, pre_box_h
                 print('the '+str(i)+' pic------------------only_box is null', x1, y1)
 
-            drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, frameid)
+            #drawBoxOnImg(img, box_x, box_y, box_w, box_h, x1, y1, frameid)
 
             # 然后计算速度+距离
             # distance_x代表相距前车距离
@@ -542,7 +551,7 @@ def handleVideo(video_path, time_txt_name, output_result_json_path, camera_param
         json.dump(final_dict, json_file, ensure_ascii = False)
 
     # row data to file:
-    with open('/home/m10/workspace/darknet/rowdata.json','w+') as row_json_file:
+    with open('/home/m10/workspace/darknet/rowdata'+str(frameid)+'.json','w+') as row_json_file:
         json.dump(tmp_dict, row_json_file, ensure_ascii = False)
 
     print('=========pipeline finished,write json finished============>')
